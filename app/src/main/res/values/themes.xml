@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Base application theme. -->
+    <style name="Theme.QuickOrder" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- Customize your light theme here. -->
+        <item name="colorPrimary">@color/purple_500</item>
+    </style>
+
+    <style name="Theme.QuickOrder.Splash" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/esmeralda</item>
+        <item name="windowSplashScreenAnimatedIcon">@mipmap/ic_launcher2_foreground</item>
+        <item name="postSplashScreenTheme">@style/Theme.QuickOrder</item>
+    </style>
+</resources>
