@@ -16,6 +16,21 @@ import kotlin.collections.emptyList
 
 
 
+/**
+
+ * ViewModel responsable de gestionar los datos relacionados con el producto y el estado de la interfaz de usuario.
+
+ *
+ * Proporciona un flujo reactivo de productos mediante [getProductsUseCase] ​​y expone
+
+ * la funcionalidad para añadir nuevos productos a través del [repositorio].
+
+ *
+ * @property getProductsUseCase Caso de uso para recuperar el flujo de entidades de producto.
+
+ * @property repository Repositorio utilizado para realizar operaciones de datos, como añadir un producto.
+
+ */
 @HiltViewModel
 class ProductViewModel @Inject constructor(
     private val getProductsUseCase: GetProductsUseCase,

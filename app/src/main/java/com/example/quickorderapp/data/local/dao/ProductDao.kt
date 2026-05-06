@@ -9,6 +9,10 @@ import androidx.room.Delete
 
 
 
+/*
+ * Objeto de acceso a datos (DAO) para gestionar las entradas de [ProductEntity] en la base de datos local.
+ * Proporciona métodos para realizar operaciones CRUD en la tabla de productos.
+ */
 @Dao
 interface ProductDao {
     @Query("SELECT * FROM products")

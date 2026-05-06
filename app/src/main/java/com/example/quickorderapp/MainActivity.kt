@@ -18,6 +18,20 @@ import com.example.quickorderapp.ui.navigation.NavGraph
 import com.example.quickorderapp.ui.theme.QuickOrderAppTheme
 import com.example.quickorderapp.viewmodel.SplashViewModel
 import dagger.hilt.android.AndroidEntryPoint
+/**
+
+ * Punto de entrada principal de la aplicación.
+
+ *
+ * Esta actividad se encarga de:
+
+ * - Inicializar la inyección de dependencias de Hilt mediante [@AndroidEntryPoint].
+
+ * - Gestionar el estado y la visibilidad de la pantalla de inicio usando [SplashViewModel].
+
+ * - Configurar la interfaz de usuario de Jetpack Compose y alojar el [NavGraph] para gestionar la navegación de la aplicación.
+
+ */
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 

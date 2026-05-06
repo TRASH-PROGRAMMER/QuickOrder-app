@@ -25,6 +25,19 @@ import androidx.compose.ui.unit.dp
 
 
 
+/**
+
+ * Función componible que representa la pantalla de inicio de sesión de la aplicación.
+
+ *
+ * Esta pantalla proporciona campos para ingresar las credenciales del usuario (correo electrónico y contraseña) y
+
+ * gestiona la navegación a la pantalla de inicio tras iniciar sesión o a la pantalla de registro.
+
+ *
+ * @param navController El [NavController] utilizado para gestionar la navegación de la aplicación entre pantallas.
+
+ */
 @Composable
 fun LoginScreen(navController: NavController) {
     var email by remember { mutableStateOf("") } // Cambia el tipo de dato a String

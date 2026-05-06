@@ -8,6 +8,9 @@ import com.example.quickorderapp.data.local.entities.OrderEntity
 import androidx.room.Delete
 
 
+/**
+ * Objeto de acceso a datos (DAO) para gestionar instancias de [OrderEntity] en el entorno local.
+ */
 @Dao
 interface OrderDao {
     @Query("SELECT * FROM orders")

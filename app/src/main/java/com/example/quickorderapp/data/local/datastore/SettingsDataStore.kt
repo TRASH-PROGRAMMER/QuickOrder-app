@@ -10,6 +10,10 @@ import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 import javax.inject.Singleton
 
+/**
+ * Extension property to provide a singleton instance of DataStore for the application's preferences.
+ * Uses the "settings" file name to persist key-value pairs locally.
+ */
 private val Context.dataStore by preferencesDataStore(name = "settings")
 
 @Singleton

@@ -23,6 +23,21 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.quickorderapp.data.local.entities.ProductEntity
 import com.example.quickorderapp.viewmodel.ProductViewModel
 
+/**
+
+ * Función componible que representa la pantalla de producto.
+
+ *
+ * Esta pantalla muestra una lista de productos disponibles y proporciona un botón para agregar un nuevo
+ * producto de muestra a la base de datos. Utiliza un [ProductViewModel] para gestionar el
+ * estado de la interfaz de usuario y manejar las operaciones relacionadas con el producto.
+
+ *
+ * @param viewModel El [ProductViewModel] utilizado para obtener los productos y realizar acciones.
+
+ * Por defecto, utiliza un modelo de vista proporcionado por Hilt.
+
+ */
 @Composable
 fun ProductScreen(viewModel: ProductViewModel = hiltViewModel()) {
     val products by viewModel.products.collectAsState()
