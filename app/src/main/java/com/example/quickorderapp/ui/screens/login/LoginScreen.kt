@@ -18,11 +18,18 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-
+import androidx.compose.ui.text.style.TextAlign
+import com.example.quickorderapp.ui.theme.Typography
+import androidx.compose.ui.res.colorResource
+import com.example.quickorderapp.R
 
 
 /**
@@ -48,38 +55,51 @@ fun LoginScreen(navController: NavController) {
 
 
     ) {
-     Text("LOGIN",style = MaterialTheme.typography.headlineMedium)
+        Text("LOGIN",style = MaterialTheme.typography.headlineMedium, textAlign=TextAlign.Center , modifier = Modifier.fillMaxWidth(),fontWeight = FontWeight.Bold,
+        )
         OutlinedTextField(
             value = email,
             onValueChange = { email = it },
             label = { Text("Email") },
-            modifier = Modifier.padding(bottom = 16.dp)// Agrega padding
+            shape = RoundedCornerShape(12.dp),
+            modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)// Agrega padding
         )
         OutlinedTextField(
             value = password,
             onValueChange = { password = it },
             label = { Text("Password") },
-            modifier = Modifier.padding(bottom = 16.dp)// Agrega padding
+            shape = RoundedCornerShape(12.dp),
+            modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)// Agrega padding
+
         )
         Spacer(Modifier.height(16.dp))
         Button(
             onClick = {
-                 if (email=="test@test.com" && password=="1234")
-                 {
-                     println("Login exitoso")
-                 }
+                if (email=="test@test.com" && password=="1234")
+                {
+                    println("Login exitoso")
+                }
                 navController.navigate("home")
             },
-            modifier = Modifier.padding(bottom = 16.dp)// Agrega padding
+            colors = ButtonDefaults.buttonColors(
+                containerColor = colorResource(R.color.esmeralda)
+            ),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 16.dp)
+                .align(Alignment.CenterHorizontally) // Agrega padding
         ) {
             Text("Login" ,style = MaterialTheme.typography.bodyLarge)
         }
         Spacer(Modifier.height(12.dp))
         Text(
             text = "No tienes una cuenta? Regístrate",
-            color = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.clickable {
+            color = colorResource(R.color.esmeralda) ,
+            textAlign = TextAlign.Center,
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable {
                 navController.navigate("register")
             }
         )
-}}
+    }}

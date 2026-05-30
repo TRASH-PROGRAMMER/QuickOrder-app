@@ -1,6 +1,7 @@
 package com.example.quickorderapp.ui.screens.home
 
-import androidx.compose.foundation.layout.Box
+import android.annotation.SuppressLint
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -18,9 +19,13 @@ import androidx.navigation.NavController
  * @param navController El [NavController] utilizado para gestionar las transiciones de navegación entre pantallas.
 
  */
+@SuppressLint("UnusedBoxWithConstraintsScope")
 @Composable
 fun HomeScreen(navController: NavController) {
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+    BoxWithConstraints(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
         Text(text = "Home Screen")
     }
 }
