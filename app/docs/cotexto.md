@@ -213,6 +213,7 @@ El flujo propuesto es coherente con las necesidades identificadas en el proceso 
 ## 6. Diseño UX/ui
 aplicar diceño centrado al usuario 
 aplicar usabilida y acesibilidad
+guiarse con el prototipo que esta en com/example/quickorderapp/docs/prototipos
 ## 7.arquitectura base
 base funcional completa (esqueleto real) alineada con MVVM + Clean Architecture + Room + DataStore + DI (Hilt).
 estructura de  la arquitectura :
@@ -236,7 +237,7 @@ com.example.quickorderapp
 │    ├── components
 │    └── navigation
 │
-├── viewmodel
+├── viewmodel 
 ├── di
 │
 ├── ui.theme  
