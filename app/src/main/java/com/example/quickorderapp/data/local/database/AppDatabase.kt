@@ -1,34 +1,32 @@
 package com.example.quickorderapp.data.local.database
+
 import androidx.room.Database
-import com.example.quickorderapp.data.local.entities.OrderDetailEntity
-import com.example.quickorderapp.data.local.entities.OrderEntity
-import com.example.quickorderapp.data.local.entities.ProductEntity
 import androidx.room.RoomDatabase
-import com.example.quickorderapp.data.local.dao.ProductDao
-import com.example.quickorderapp.data.local.dao.OrderDao
+import com.example.quickorderapp.data.local.dao.*
+import com.example.quickorderapp.data.local.entities.*
 
-
-
-/*
-La base de datos principal [RoomDatabase] para la aplicación Pedido Rápido.
-
- *
- * Esta clase define la configuración de la base de datos y sirve como punto de acceso principal para
-
- * los datos persistentes, gestionando entidades como [ProductEntity], [OrderEntity] y [OrderDetailEntity].
-
- *
- * @property productDao Proporciona acceso a las operaciones de datos relacionadas con el producto.
-
- * @property orderDao Proporciona acceso a las operaciones de datos relacionadas con el pedido y sus detalles.
+/**
+ * Base de datos principal de Room para QuickOrder.
  */
 @Database(
-    entities = [ProductEntity::class, OrderEntity::class, OrderDetailEntity::class],
-    version = 1,
+    entities = [
+        ProductEntity::class,
+        OrderEntity::class,
+        OrderDetailEntity::class,
+        UserEntity::class,
+        MesaEntity::class,
+        PromocionEntity::class,
+        VentaEntity::class
+    ],
+    version = 2, // Incrementado debido a cambios en el esquema y nuevas tablas
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
     abstract fun productDao(): ProductDao
     abstract fun orderDao(): OrderDao
+    abstract fun orderDetailDao(): OrderDetailDao
+    abstract fun userDao(): UserDao
+    abstract fun mesaDao(): MesaDao
+    abstract fun promocionDao(): PromocionDao
+    abstract fun ventaDao(): VentaDao
 }
-

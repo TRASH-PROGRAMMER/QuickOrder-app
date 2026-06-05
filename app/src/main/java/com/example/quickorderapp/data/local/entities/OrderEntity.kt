@@ -4,11 +4,12 @@ import androidx.room.PrimaryKey
  /**
   * Representa un registro de pedido dentro de la tabla "pedidos" de la base de datos.
   */
- @Entity(tableName = "orders")
+ @Entity(tableName = "pedidos")
 data class OrderEntity(
     @PrimaryKey(autoGenerate = true)
     val id: Int = 0,
-    val tableNumber: Int,
+    val numeroMesa: Int,
     val total: Double,
-    val status: String
+    val estado: String, // "Pendiente", "Preparando", "Servido", "Pagado"
+    val fecha: Long = System.currentTimeMillis()
  )

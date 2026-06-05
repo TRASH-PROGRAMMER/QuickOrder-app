@@ -23,7 +23,7 @@ Representa un registro de producto dentro de la base de datos local de Room.
 
  * @property descuento Descuento aplicable al producto.
  */
-@Entity(tableName = "products")
+@Entity(tableName = "productos")
 data class ProductEntity(
     @PrimaryKey(autoGenerate = true) 
     val id: Int = 0,

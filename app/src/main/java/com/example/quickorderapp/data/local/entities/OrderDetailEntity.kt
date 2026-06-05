@@ -6,27 +6,31 @@ import androidx.room.Index
 import androidx.room.PrimaryKey
 
 /**
- * Representa una línea de artículo específica dentro de un pedido en la base de datos local.
- *
- * Esta entidad mantiene una relación de muchos a uno con [OrderEntity].
- * Si se elimina el pedido asociado, todos los detalles del pedido relacionado se eliminan automáticamente.
+ * Representa el detalle de un pedido (productos individuales).
  */
 @Entity(
-    tableName = "order_details",
+    tableName = "detalle_pedidos",
     foreignKeys = [
         ForeignKey(
             entity = OrderEntity::class,
             parentColumns = ["id"],
-            childColumns = ["orderId"],
+            childColumns = ["pedidoId"],
             onDelete = ForeignKey.CASCADE
+        ),
+        ForeignKey(
+            entity = ProductEntity::class,
+            parentColumns = ["id"],
+            childColumns = ["productoId"],
+            onDelete = ForeignKey.NO_ACTION
         )
     ],
-    indices = [Index(value = ["orderId"])]
+    indices = [Index(value = ["pedidoId"]), Index(value = ["productoId"])]
 )
 data class OrderDetailEntity(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
-    val orderId: Int,
-    val productId: Int,
-    val quantity: Int,
+    val pedidoId: Int,
+    val productoId: Int,
+    val cantidad: Int,
+    val precioUnitario: Double,
     val subtotal: Double
 )

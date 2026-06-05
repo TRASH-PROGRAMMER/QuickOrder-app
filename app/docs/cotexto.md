@@ -1,250 +1,468 @@
-# Primera Etapa – QuickOrder
+# QuickOrder
 
-## 1. Descripción de la aplicación
+## Documento de Análisis y Diseño Inicial
 
-**QuickOrder** es una aplicación móvil que permite a un restaurante gestionar pedidos, productos, mesas y ventas de forma rápida y eficiente.
+### Versión
 
----
+1.0
 
-## 2. Presentación y temática escogida para la aplicación
+### Autor
 
-La aplicación desarrollada, denominada **QuickOrder**, es una solución móvil orientada a la gestión de pedidos en restaurantes, concebida como un mini sistema de gestión de pedidos. Su propósito principal es optimizar el proceso de toma de pedidos, gestión de productos y control de ventas, facilitando el trabajo operativo dentro de pequeños y medianos establecimientos gastronómicos.
-
-La temática de la aplicación se centra en la digitalización de procesos tradicionales en restaurantes, específicamente en aquellos negocios que aún gestionan pedidos de forma manual o mediante herramientas poco eficientes. QuickOrder busca modernizar estas operaciones mediante una interfaz intuitiva, rápida y accesible, permitiendo a los usuarios (meseros o administradores) gestionar pedidos en tiempo real desde un dispositivo móvil.
-
-La elección de esta temática surge de la necesidad detectada en numerosos establecimientos gastronómicos que presentan problemas relacionados con errores en los pedidos, tiempos de atención prolongados y dificultades para llevar un control adecuado de las ventas. Mediante la automatización de estos procesos, la aplicación contribuye a mejorar la productividad, reducir errores y optimizar la experiencia tanto del personal como de los clientes.
+Equipo de Desarrollo QuickOrder
 
 ---
 
-## 3. Análisis Benchmarking
+# 1. Introducción
 
-### Panorama general del mercado
+## 1.1 Descripción General
 
-Actualmente existen millones de aplicaciones disponibles en Google Play Store, generando una alta competencia en prácticamente todas las categorías. Las aplicaciones de tipo POS (Point of Sale) y gestión de pedidos han experimentado un crecimiento significativo debido a:
+QuickOrder es una aplicación móvil para la gestión integral de pedidos en restaurantes, diseñada para optimizar los procesos de atención, administración de productos, control de mesas y seguimiento de ventas.
 
-* Digitalización de pequeños y medianos negocios.
-* Uso de dispositivos móviles como herramientas de gestión.
-* Necesidad de operar sin conexión a Internet.
-* Automatización de procesos administrativos y operativos.
+La solución busca reemplazar procesos manuales mediante una plataforma móvil intuitiva que permita operar tanto en línea como fuera de línea.
 
-### Aplicaciones similares
+## 1.2 Objetivos
 
-#### 1. RestauPOS
+### Objetivo General
 
-**Puntos fuertes**
+Desarrollar una aplicación móvil que permita gestionar eficientemente pedidos, productos, mesas y ventas dentro de establecimientos gastronómicos.
+
+### Objetivos Específicos
+
+* Reducir errores en la toma de pedidos.
+* Mejorar los tiempos de atención.
+* Facilitar el control de ventas.
+* Permitir operación offline.
+* Proporcionar métricas para la toma de decisiones.
+
+---
+
+# 2. Contexto del Problema
+
+## 2.1 Problemática Actual
+
+Muchos restaurantes pequeños y medianos continúan utilizando:
+
+* Pedidos en papel.
+* Control manual de ventas.
+* Gestión desorganizada de productos.
+* Procesos lentos de atención.
+
+Esto genera:
+
+* Errores frecuentes.
+* Pérdidas económicas.
+* Retrasos en el servicio.
+* Baja productividad operativa.
+
+## 2.2 Solución Propuesta
+
+QuickOrder digitaliza el proceso de atención mediante:
+
+* Gestión de pedidos.
+* Administración de productos.
+* Control de mesas.
+* Sistema de promociones.
+* Dashboard de ventas.
+* Funcionamiento offline.
+
+---
+
+# 3. Investigación de Mercado (Benchmarking)
+
+## 3.1 Panorama del Mercado
+
+Las aplicaciones POS han crecido debido a:
+
+* Transformación digital de negocios.
+* Uso de dispositivos móviles.
+* Necesidad de operación offline.
+* Automatización de procesos.
+
+## 3.2 Competidores Analizados
+
+### RestauPOS
+
+#### Fortalezas
 
 * Gestión completa de pedidos.
 * Control de inventario.
-* Reportes de ventas.
-* Interfaz profesional.
+* Reportes avanzados.
 
-**Puntos débiles**
+#### Debilidades
 
-* Requiere curva de aprendizaje.
-* Algunas funciones son de pago.
+* Curva de aprendizaje alta.
+* Costos adicionales.
 * Consumo elevado de recursos.
 
-#### 2. RestoKeep POS
+### RestoKeep POS
 
-**Puntos fuertes**
+#### Fortalezas
 
-* Fácil de utilizar.
-* Gestión rápida de mesas y pedidos.
-* Soporte para múltiples usuarios.
+* Facilidad de uso.
+* Gestión rápida de pedidos.
+* Soporte multiusuario.
 
-**Puntos débiles**
+#### Debilidades
 
 * Personalización limitada.
-* Funciones estadísticas básicas.
-* Dependencia de conexión para algunas características.
+* Estadísticas básicas.
 
-#### 3. Restaurant POS (Pro)
+### Restaurant POS Pro
 
-**Puntos fuertes**
+#### Fortalezas
 
-* Administración integral del restaurante.
+* Administración integral.
 * Reportes detallados.
-* Gestión de clientes y productos.
+* Gestión de clientes.
 
-**Puntos débiles**
+#### Debilidades
 
 * Interfaz compleja.
-* Costos de licencia elevados.
-* Requiere capacitación inicial.
+* Licenciamiento costoso.
 
-### Diferenciación de QuickOrder
+## 3.3 Ventajas Competitivas de QuickOrder
 
-QuickOrder busca diferenciarse de las aplicaciones existentes mediante:
-
-* Funcionamiento offline.
-* Gestión de pedidos en tiempo real.
-* Interfaz enfocada en la experiencia de usuario (UX).
-* Diseño moderno y accesible.
-* Simplicidad de uso para pequeños restaurantes.
-* Dashboard administrativo con métricas visuales.
+* Operación offline.
+* Interfaz simple.
+* Dashboard visual.
+* Gestión mediante QR.
+* Arquitectura moderna Android.
+* Sin dependencia permanente de internet.
 
 ---
 
-## 4. Investigación y requisitos de usuario
+# 4. Modelo de Negocio
 
-### Ficha de Persona 1: Mesero Operativo
+## 4.1 Tipo de Negocio
 
-**Nombre:** Carlos Mendoza
-**Edad:** 24 años
-**Ocupación:** Mesero en restaurante informal
-**Experiencia tecnológica:** Media
+### B2B SaaS
 
-Carlos trabaja en un restaurante con alta rotación de clientes, donde la rapidez en la atención es fundamental. Actualmente toma pedidos utilizando papel y bolígrafo, lo que genera errores frecuentes durante las horas de mayor afluencia. Su principal objetivo es atender a los clientes de forma rápida y precisa, minimizando equivocaciones y retrasos.
+Software orientado a restaurantes mediante suscripción.
 
-Entre sus necesidades principales se encuentran registrar pedidos de manera eficiente, consultar el menú de forma clara, identificar promociones activas y calcular automáticamente los totales de las órdenes. También necesita una interfaz intuitiva que requiera pocos pasos para completar una tarea.
+## 4.2 Propuesta de Valor
 
-Carlos se siente frustrado cuando debe corregir pedidos incorrectos o realizar cálculos manuales. Por ello valora aplicaciones simples, rápidas y enfocadas en la productividad.
+QuickOrder permite:
 
-#### Escenario
+* Digitalizar pedidos.
+* Controlar ventas.
+* Gestionar promociones.
+* Analizar métricas.
 
-Carlos recibe a un grupo de clientes en la mesa 5. Desde QuickOrder selecciona la mesa correspondiente, agrega los productos solicitados, aplica una promoción vigente y visualiza automáticamente el total del pedido. Finalmente envía la orden sin errores y procesa el pago de manera eficiente.
+## 4.3 Cliente Objetivo
 
----
-
-### Ficha de Persona 2: Administradora del Restaurante
-
-**Nombre:** Laura Pérez
-**Edad:** 35 años
-**Ocupación:** Administradora de restaurante
-**Experiencia tecnológica:** Alta
-
-Laura es responsable de supervisar las operaciones del restaurante y controlar las ventas diarias. Actualmente utiliza hojas de cálculo y registros manuales, dificultando el acceso a información actualizada y la toma de decisiones estratégicas.
-
-Sus necesidades incluyen gestionar productos y precios, crear promociones, revisar ventas diarias y analizar indicadores de desempeño. También busca reducir pérdidas operativas y mejorar la rentabilidad del negocio mediante decisiones basadas en datos.
-
-Laura valora sistemas organizados, visuales y centralizados que permitan administrar todos los procesos desde una única aplicación.
-
-#### Escenario
-
-Al finalizar la jornada laboral, Laura accede al dashboard de QuickOrder para revisar las ventas del día, identificar los productos más vendidos y analizar el impacto de las promociones. Con esta información realiza ajustes estratégicos orientados a mejorar los resultados del restaurante.
+* Restaurantes pequeños.
+* Restaurantes medianos.
+* Cafeterías.
+* Negocios gastronómicos.
 
 ---
 
-## 5. Requisitos funcionales
+# 5. Investigación de Usuarios
 
-### Requisitos funcionales generales
+## 5.1 Persona 1 – Mesero Operativo
 
-1. Iniciar sesión.
-2. Registrarse.
-3. Escanear código QR.
-4. CRUD de productos.
-5. Gestionar promociones y descuentos.
-6. Enlistar productos.
-7. CRUD de pedidos.
-8. CRUD de mesas.
-9. Gestionar ventas.
-10. Visualizar estados del pedido.
-11. Operar en modo offline.
-12. Configuración de la aplicación.
-13. Visualizar menú con promociones.
-14. Dashboard administrativo.
-15. Splash Screen.
+### Perfil
 
-### Requisitos funcionales por rol
+* Nombre: Carlos Mendoza
+* Edad: 24 años
+* Experiencia tecnológica: Media
 
-#### Administrador
+### Necesidades
+
+* Registrar pedidos rápidamente.
+* Consultar promociones.
+* Calcular totales automáticamente.
+* Reducir errores.
+
+### Escenario de Uso
+
+Registrar pedidos de una mesa y enviarlos sin errores.
+
+---
+
+## 5.2 Persona 2 – Administradora
+
+### Perfil
+
+* Nombre: Laura Pérez
+* Edad: 35 años
+* Experiencia tecnológica: Alta
+
+### Necesidades
+
+* Supervisar ventas.
+* Gestionar productos.
+* Analizar métricas.
+* Crear promociones.
+
+### Escenario de Uso
+
+Consultar indicadores de rendimiento diarios.
+
+---
+
+# 6. Requerimientos del Sistema
+
+## 6.1 Requerimientos Funcionales
+
+### Autenticación
 
 * Iniciar sesión.
 * Registrarse.
-* Gestionar productos.
-* Gestionar promociones.
-* Gestionar descuentos.
-* Gestionar pedidos.
-* Gestionar ventas.
-* Configurar la aplicación.
-* Consultar métricas.
-* Visualizar gráficos estadísticos.
+* Recuperar acceso.
 
-#### Mesero
+### Gestión de Productos
 
-* Iniciar sesión.
-* Visualizar productos.
-* Consultar promociones.
-* Crear pedidos.
-* Modificar pedidos.
-* Eliminar pedidos.
-* Asociar pedidos a mesas.
-* Finalizar pedidos.
+* Crear productos.
+* Editar productos.
+* Eliminar productos.
+* Listar productos.
 
-#### Comensal (Cliente)
+### Gestión de Pedidos
 
-* Registrarse (opcional).
-* Visualizar menú.
-* Consultar promociones.
-* Realizar pedidos.
-* Modificar pedidos.
-* Finalizar pedidos.
+* Crear pedido.
+* Modificar pedido.
+* Cancelar pedido.
+* Consultar estado.
+
+### Gestión de Mesas
+
+* Crear mesa.
+* Editar mesa.
+* Asociar pedidos.
+
+### Gestión de Ventas
+
+* Registrar venta.
+* Consultar historial.
+* Generar métricas.
+
+### Promociones
+
+* Crear promociones.
+* Aplicar descuentos.
+* Gestionar vigencia.
+
+### Administración
+
+* Dashboard.
+* Estadísticas.
+* Configuración.
 
 ---
 
-## 6. Validación del flujo actual
+## 6.2 Requerimientos No Funcionales
 
-### Flujo del Cliente
+### Rendimiento
 
-1. Escanea código QR.
-2. Descarga o accede a la aplicación.
-3. Selecciona la mesa.
-4. Visualiza el menú.
-5. Realiza el pedido.
-6. Consulta el estado en tiempo real.
+* Tiempo de carga menor a 2 segundos.
 
-### Flujo del Mesero
+### Disponibilidad
 
-1. Recibe pedidos.
-2. Coordina con cocina.
-3. Actualiza el estado del pedido.
-4. Gestiona la entrega.
+* Funcionamiento offline.
 
-### Flujo del Administrador
+### Seguridad
 
-1. Gestiona productos y promociones.
-2. Gestiona mesas.
-3. Supervisa pedidos.
-4. Analiza estadísticas.
-5. Revisa métricas de ventas.
+* Gestión de sesiones.
+* Persistencia segura.
 
-El flujo propuesto es coherente con las necesidades identificadas en el proceso de atención de restaurantes, permitiendo optimizar tiempos, reducir errores y mejorar la experiencia de usuarios y clientes.
+### Usabilidad
 
-## 6. Diseño UX/ui
-aplicar diceño centrado al usuario 
-aplicar usabilida y acesibilidad
-guiarse con el prototipo que esta en com/example/quickorderapp/docs/prototipos
-## 7.arquitectura base
-base funcional completa (esqueleto real) alineada con MVVM + Clean Architecture + Room + DataStore + DI (Hilt).
-estructura de  la arquitectura :
-com.example.quickorderapp
-├── data
-│    ├── local
-│    │     ├── dao
-│    │     ├── database
-│    │     └── entities
-│    │
-│    ├── datastore
-│    └── repository
-│
-├── domain
-│    ├── model
-│    ├── repository
-│    └── usecase
-│
-├── ui
-│    ├── screens
-│    ├── components
-│    └── navigation
-│
-├── viewmodel 
-├── di
-│
-├── ui.theme  
-└── MainActivity.kt 
+* Diseño intuitivo.
+* Flujo simplificado.
 
-## 8. data base
-Registro de usuario en la base de datos
-Pantalla de configuración para persistencia local ligera (DataStore)
-CRUD del proceso principal de la aplicacion en la base de datos local con el patron MVVM y ROOM (mínimo 2
-tablas maestras y 1 tabla transaccional)
+### Accesibilidad
+
+* Contraste adecuado.
+* Compatibilidad con TalkBack.
+* Componentes accesibles.
+
+---
+
+# 7. Flujos de Usuario
+
+## 7.1 Flujo del Comensal
+
+1. Escanear QR.
+2. Abrir menú.
+3. Seleccionar productos.
+4. Confirmar pedido.
+5. Consultar estado.
+
+## 7.2 Flujo del Mesero
+
+1. Recibir pedido.
+2. Gestionar atención.
+3. Actualizar estado.
+4. Finalizar servicio.
+
+## 7.3 Flujo del Administrador
+
+1. Gestionar catálogo.
+2. Gestionar promociones.
+3. Supervisar ventas.
+4. Analizar métricas.
+
+---
+
+# 8. Diseño UX/UI
+
+## Principios Aplicados
+
+### Diseño Centrado en el Usuario
+
+* Simplicidad.
+* Eficiencia.
+* Consistencia.
+
+### Usabilidad
+
+* Navegación clara.
+* Acciones rápidas.
+* Feedback visual.
+
+### Accesibilidad
+
+* WCAG.
+* TalkBack.
+* Contraste AA.
+
+### Referencia Visual
+
+Los diseños se basarán en los prototipos definidos dentro de:
+
+docs/prototipos
+
+---
+
+# 9. Arquitectura del Sistema
+
+## Patrón Arquitectónico
+
+MVVM + Clean Architecture
+
+## Tecnologías
+
+* Kotlin
+* Jetpack Compose
+* Room
+* DataStore
+* Hilt
+* Navigation Compose
+* Firebase (sincronización)
+
+## Estructura del Proyecto
+
+data/
+├── local/
+├── datastore/
+└── repository/
+
+domain/
+├── model/
+├── repository/
+└── usecase/
+
+ui/
+├── screens/
+├── components/
+└── navigation/
+
+viewmodel/
+di/
+ui/theme/
+
+---
+
+# 10. Persistencia de Datos
+
+## Base de Datos Local
+
+Room Database
+
+### Tablas Maestras
+
+* Productos
+* Mesas
+
+### Tabla Transaccional
+
+* Pedidos
+
+## Persistencia Ligera
+
+DataStore
+
+Configuraciones:
+
+* Tema.
+* Preferencias.
+* Sesión.
+
+---
+
+# 11. Sistema QR y Operación Offline
+
+## Objetivo
+
+Permitir acceso al menú sin conexión permanente a internet.
+
+## Solución
+
+QR + Deep Links + Room Database
+
+### Flujo
+
+Administrador
+↓
+Carga menú
+↓
+Room Database
+↓
+Genera QR por mesa
+
+Comensal
+↓
+Escanea QR
+↓
+Deep Link
+↓
+MenuScreen
+↓
+Consulta Room
+↓
+Visualiza menú
+
+## Beneficios
+
+* Acceso rápido.
+* Menor dependencia de internet.
+* Mejor experiencia de usuario.
+
+---
+
+# 12. Sincronización de Datos
+
+## Estrategia
+
+Firebase Firestore + Room
+
+### Room
+
+Fuente local de datos.
+
+### Firebase
+
+Sincronización remota.
+
+### Beneficios
+
+* Operación offline.
+* Sincronización automática.
+* Dashboard en tiempo real.
+
+---
+
+# 13. Conclusiones
+
+QuickOrder propone una solución moderna para la gestión de restaurantes mediante una arquitectura escalable, soporte offline, experiencia de usuario optimizada y sincronización en tiempo real, permitiendo mejorar la productividad operativa y la calidad del servicio.

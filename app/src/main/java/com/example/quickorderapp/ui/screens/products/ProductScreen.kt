@@ -1,46 +1,27 @@
 package com.example.quickorderapp.ui.screens.products
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.example.quickorderapp.data.local.entities.ProductEntity
+import com.example.quickorderapp.domain.model.Product
+import com.example.quickorderapp.viewmodel.ProductUiState
 import com.example.quickorderapp.viewmodel.ProductViewModel
 
 /**
-
- * Función componible que representa la pantalla de producto.
-
- *
- * Esta pantalla muestra una lista de productos disponibles y proporciona un botón para agregar un nuevo
- * producto de muestra a la base de datos. Utiliza un [ProductViewModel] para gestionar el
- * estado de la interfaz de usuario y manejar las operaciones relacionadas con el producto.
-
- *
- * @param viewModel El [ProductViewModel] utilizado para obtener los productos y realizar acciones.
-
- * Por defecto, utiliza un modelo de vista proporcionado por Hilt.
-
+ * Pantalla que muestra el catálogo de productos.
+ * Implementa el manejo de estados (Cargando, Éxito, Error) según reglas.md.
  */
 @Composable
 fun ProductScreen(viewModel: ProductViewModel = hiltViewModel()) {
-    val products by viewModel.products.collectAsState()
+    val uiState by viewModel.uiState.collectAsState()
 
     Column(
         modifier = Modifier
@@ -48,9 +29,54 @@ fun ProductScreen(viewModel: ProductViewModel = hiltViewModel()) {
             .padding(16.dp)
     ) {
         Text(text = "Productos", fontSize = 24.sp, fontWeight = FontWeight.Bold)
-        Spacer(modifier = Modifier.padding(8.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
-        LazyColumn(modifier = Modifier.weight(1f)) {
+        Box(modifier = Modifier.weight(1f)) {
+            when (val state = uiState) {
+                is ProductUiState.Loading -> {
+                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                }
+                is ProductUiState.Success -> {
+                    ProductList(products = state.products)
+                }
+                is ProductUiState.Error -> {
+                    Text(
+                        text = "Error: ${state.message}",
+                        color = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.align(Alignment.Center)
+                    )
+                }
+            }
+        }
+
+        Button(
+            onClick = {
+                viewModel.addProduct(
+                    Product(
+                        nombre = "Nuevo Producto",
+                        precio = 10.0,
+                        descripcion = "Descripción del nuevo producto",
+                        categoria = "General"
+                    )
+                )
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 16.dp)
+        ) {
+            Text(text = "Agregar Producto de Prueba")
+        }
+    }
+}
+
+@Composable
+fun ProductList(products: List<Product>) {
+    if (products.isEmpty()) {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Text(text = "No hay productos disponibles")
+        }
+    } else {
+        LazyColumn {
             items(products) { product ->
                 Card(
                     modifier = Modifier
@@ -68,23 +94,6 @@ fun ProductScreen(viewModel: ProductViewModel = hiltViewModel()) {
                     }
                 }
             }
-        }
-
-        Button(
-            onClick = {
-                viewModel.addProduct(
-                    ProductEntity(
-                        nombre = "Nuevo Producto",
-                        precio = 10.0,
-                        descripcion = "Descripción del nuevo producto"
-                    )
-                )
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 16.dp)
-        ) {
-            Text(text = "Agregar Producto")
         }
     }
 }

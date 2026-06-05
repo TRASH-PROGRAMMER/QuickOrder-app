@@ -15,10 +15,10 @@ import androidx.room.Delete
  */
 @Dao
 interface ProductDao {
-    @Query("SELECT * FROM products")
+    @Query("SELECT * FROM productos")
      fun getAll(): Flow<List<ProductEntity>>
      @Insert(onConflict = OnConflictStrategy.REPLACE)
-     suspend fun insertAll(products: ProductEntity)
+     suspend fun insert(product: ProductEntity)
      @Delete
      suspend fun delete(product: ProductEntity)
 }

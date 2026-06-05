@@ -1,7 +1,7 @@
 package com.example.quickorderapp.di
 
-import com.example.quickorderapp.data.repository.ProductRepository
-import com.example.quickorderapp.data.repository.RepositoryImpl
+import com.example.quickorderapp.data.repository.ProductRepositoryImpl
+import com.example.quickorderapp.domain.repository.ProductRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -9,13 +9,7 @@ import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
 /**
- * Módulo Dagger Hilt que proporciona enlaces de inyección de dependencias para repositorios.
- *
- * *
- * * Este módulo se encarga de vincular la interfaz [ProductRepository] con su
- * * implementación concreta, [RepositoryImpl]. Se instala en el [SingletonComponent],
- * * asegurando que las instancias del repositorio se mantengan como singletons durante todo el
- * * ciclo de vida de la aplicación.
+ * Módulo de Hilt para la inyección de repositorios.
  */
 @Module
 @InstallIn(SingletonComponent::class)
@@ -24,6 +18,6 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindProductRepository(
-        repositoryImpl: RepositoryImpl
+        productRepositoryImpl: ProductRepositoryImpl
     ): ProductRepository
 }

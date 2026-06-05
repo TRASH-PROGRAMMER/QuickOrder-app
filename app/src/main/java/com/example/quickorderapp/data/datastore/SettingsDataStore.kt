@@ -1,4 +1,4 @@
-package com.example.quickorderapp.data.local.datastore
+package com.example.quickorderapp.data.datastore
 
 import android.content.Context
 import androidx.datastore.preferences.core.booleanPreferencesKey
@@ -10,12 +10,12 @@ import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 import javax.inject.Singleton
 
-/**
- * Extension property to provide a singleton instance of DataStore for the application's preferences.
- * Uses the "settings" file name to persist key-value pairs locally.
- */
 private val Context.dataStore by preferencesDataStore(name = "settings")
 
+/**
+ * DataStore para configuraciones y preferencias de usuario.
+ * Ubicado en data/datastore según las reglas del proyecto.
+ */
 @Singleton
 class SettingsDataStore @Inject constructor(
     @ApplicationContext private val context: Context

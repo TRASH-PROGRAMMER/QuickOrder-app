@@ -2,8 +2,7 @@ package com.example.quickorderapp.di
 
 import android.content.Context
 import androidx.room.Room
-import com.example.quickorderapp.data.local.dao.OrderDao
-import com.example.quickorderapp.data.local.dao.ProductDao
+import com.example.quickorderapp.data.local.dao.*
 import com.example.quickorderapp.data.local.database.AppDatabase
 import dagger.Module
 import dagger.Provides
@@ -13,11 +12,7 @@ import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
 /**
-
- * Módulo Dagger Hilt que proporciona dependencias relacionadas con la base de datos.
- * Este módulo se encarga de inicializar la instancia de la base de datos Room y
- * proporcionar los objetos de acceso a datos (DAO) necesarios para la persistencia de datos local.
- * Todas las dependencias proporcionadas aquí están limitadas al [SingletonComponent].
+ * Módulo de Hilt para proporcionar la base de datos y sus DAOs.
  */
 @Module
 @InstallIn(SingletonComponent::class)
@@ -30,16 +25,29 @@ object DatabaseModule {
             context,
             AppDatabase::class.java,
             "quick_order_db"
-        ).build()
+        )
+        .fallbackToDestructiveMigration() // Útil durante el desarrollo inicial
+        .build()
     }
 
     @Provides
-    fun provideProductDao(database: AppDatabase): ProductDao {
-        return database.productDao()
-    }
+    fun provideProductDao(database: AppDatabase): ProductDao = database.productDao()
 
     @Provides
-    fun provideOrderDao(database: AppDatabase): OrderDao {
-        return database.orderDao()
-    }
+    fun provideOrderDao(database: AppDatabase): OrderDao = database.orderDao()
+
+    @Provides
+    fun provideOrderDetailDao(database: AppDatabase): OrderDetailDao = database.orderDetailDao()
+
+    @Provides
+    fun provideUserDao(database: AppDatabase): UserDao = database.userDao()
+
+    @Provides
+    fun provideMesaDao(database: AppDatabase): MesaDao = database.mesaDao()
+
+    @Provides
+    fun providePromocionDao(database: AppDatabase): PromocionDao = database.promocionDao()
+
+    @Provides
+    fun provideVentaDao(database: AppDatabase): VentaDao = database.ventaDao()
 }
