@@ -12,12 +12,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.quickorderapp.domain.model.Product
+import com.example.quickorderapp.ui.components.ProductCard
 import com.example.quickorderapp.viewmodel.ProductUiState
 import com.example.quickorderapp.viewmodel.ProductViewModel
 
 /**
  * Pantalla que muestra el catálogo de productos.
- * Implementa el manejo de estados (Cargando, Éxito, Error) según reglas.md.
  */
 @Composable
 fun ProductScreen(viewModel: ProductViewModel = hiltViewModel()) {
@@ -78,21 +78,7 @@ fun ProductList(products: List<Product>) {
     } else {
         LazyColumn {
             items(products) { product ->
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 4.dp)
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Text(text = product.nombre)
-                        Text(text = "$${product.precio}")
-                    }
-                }
+                ProductCard(product = product)
             }
         }
     }

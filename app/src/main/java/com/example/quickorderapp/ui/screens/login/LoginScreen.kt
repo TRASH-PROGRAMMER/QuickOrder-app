@@ -1,105 +1,129 @@
 package com.example.quickorderapp.ui.screens.login
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.navigation.NavController
-import androidx.compose.material3.Button
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.text.style.TextAlign
-import com.example.quickorderapp.ui.theme.Typography
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 import com.example.quickorderapp.R
+import com.example.quickorderapp.viewmodel.LoginViewModel
 
-
-/**
-
- * Función componible que representa la pantalla de inicio de sesión de la aplicación.
-
- *
- * Esta pantalla proporciona campos para ingresar las credenciales del usuario (correo electrónico y contraseña) y
-
- * gestiona la navegación a la pantalla de inicio tras iniciar sesión o a la pantalla de registro.
-
- *
- * @param navController El [NavController] utilizado para gestionar la navegación de la aplicación entre pantallas.
-
- */
 @Composable
-fun LoginScreen(navController: NavController) {
-    var email by remember { mutableStateOf("") } // Cambia el tipo de dato a String
-    var password by remember { mutableStateOf("") }// Cambia el tipo de dato a String
+fun LoginScreen(
+    navController: NavController,
+    viewModel: LoginViewModel = hiltViewModel()
+) {
+    var emailInput by remember { mutableStateOf("") }
+    val email = emailInput.trim().lowercase()
+    var password by remember { mutableStateOf("") }
+    
+    val emailError = when {
+        email.isBlank() -> "El correo es obligatorio"
+        !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches() -> "Ingrese un correo válido"
+        else -> null
+    }
+    
+    val passwordError = when {
+        password.isBlank() -> "La contraseña es obligatoria"
+        password.length < 4 -> "Mínimo 4 caracteres"
+        else -> null
+    }
+    
+    val isFormValid = emailError == null && passwordError == null && email.isNotBlank() && password.isNotBlank()
+    
+    var passwordVisible by remember { mutableStateOf(false) }
+    
     Column(
-        modifier = Modifier.fillMaxSize().padding(16.dp),// Agrega padding
-        verticalArrangement = Arrangement.Center// Centra verticalmente
-
-
+        modifier = Modifier.fillMaxSize().padding(16.dp),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text("LOGIN",style = MaterialTheme.typography.headlineMedium, textAlign=TextAlign.Center , modifier = Modifier.fillMaxWidth(),fontWeight = FontWeight.Bold,
+        Text(
+            text = "LOGIN",
+            style = MaterialTheme.typography.headlineMedium,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.fillMaxWidth(),
+            fontWeight = FontWeight.Bold
         )
+        
+        Spacer(modifier = Modifier.height(24.dp))
+
         OutlinedTextField(
-            value = email,
-            onValueChange = { email = it },
-            label = { Text("Email") },
+            value = emailInput,
+            onValueChange = { emailInput = it },
+            label = { Text("Correo electrónico") },
+            isError = emailError != null,
+            supportingText = { emailError?.let { Text(it) } },
             shape = RoundedCornerShape(12.dp),
-            modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)// Agrega padding
+            singleLine = true,
+            modifier = Modifier.fillMaxWidth(),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
         )
+        
+        Spacer(modifier = Modifier.height(8.dp))
+
         OutlinedTextField(
             value = password,
             onValueChange = { password = it },
-            label = { Text("Password") },
+            label = { Text("Contraseña") },
             shape = RoundedCornerShape(12.dp),
-            modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)// Agrega padding
-
+            singleLine = true,
+            isError = passwordError != null,
+            supportingText = { passwordError?.let { Text(it) } },
+            modifier = Modifier.fillMaxWidth(),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+            visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+            trailingIcon = {
+                Text(
+                    text = if (passwordVisible) "Ocultar" else "Mostrar",
+                    color = colorResource(R.color.esmeralda),
+                    modifier = Modifier
+                        .padding(end = 8.dp)
+                        .clickable { passwordVisible = !passwordVisible },
+                    style = MaterialTheme.typography.labelMedium
+                )
+            }
         )
-        Spacer(Modifier.height(16.dp))
+        
+        Spacer(Modifier.height(24.dp))
+        
         Button(
+            enabled = isFormValid,
             onClick = {
-                if (email=="test@test.com" && password=="1234")
-                {
-                    println("Login exitoso")
-                }
+                viewModel.login(email)
                 navController.navigate("home")
             },
             colors = ButtonDefaults.buttonColors(
                 containerColor = colorResource(R.color.esmeralda)
             ),
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 16.dp)
-                .align(Alignment.CenterHorizontally) // Agrega padding
+            modifier = Modifier.fillMaxWidth().height(50.dp)
         ) {
-            Text("Login" ,style = MaterialTheme.typography.bodyLarge)
+            Text("Iniciar Sesión", style = MaterialTheme.typography.bodyLarge)
         }
-        Spacer(Modifier.height(12.dp))
+        
+        Spacer(Modifier.height(16.dp))
+        
         Text(
-            text = "No tienes una cuenta? Regístrate",
-            color = colorResource(R.color.esmeralda) ,
+            text = "¿No tienes cuenta? Regístrate",
+            color = colorResource(R.color.esmeralda),
             textAlign = TextAlign.Center,
             modifier = Modifier
                 .fillMaxWidth()
                 .clickable {
-                navController.navigate("register")
-            }
+                    navController.navigate("register")
+                }
         )
-    }}
+    }
+}

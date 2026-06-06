@@ -1,84 +1,133 @@
 package com.example.quickorderapp.ui.screens.home
 
 import android.annotation.SuppressLint
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.BoxWithConstraints
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.quickorderapp.R
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.width
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.Text
+import com.example.quickorderapp.ui.components.CategoryFilterRow
+import com.example.quickorderapp.ui.components.ProductCard
+import com.example.quickorderapp.viewmodel.HomeViewModel
+import com.example.quickorderapp.viewmodel.ProductUiState
+import com.example.quickorderapp.viewmodel.ProductViewModel
 
-
-/**
-
- * Función componible que representa la pantalla de inicio de la aplicación.
-
- * Esta pantalla sirve como página de inicio principal para el usuario.
-
- *
- * @param navController El [NavController] utilizado para gestionar las transiciones de navegación entre pantallas.
-
- */
 @SuppressLint("UnusedBoxWithConstraintsScope")
 @Composable
-fun HomeScreen(navController: NavController) {
+fun HomeScreen(
+    navController: NavController,
+    productViewModel: ProductViewModel = hiltViewModel(),
+    homeViewModel: HomeViewModel = hiltViewModel()
+) {
+    var selectedCategory by remember { mutableStateOf("Entradas") }
+    val categories = listOf("Entradas", "Platos Fuertes", "Promociones", "Bebidas", "Postres")
+    val uiState by productViewModel.uiState.collectAsState()
+    val userRole by homeViewModel.userRole.collectAsState()
+
     Column(
-        modifier = Modifier.fillMaxSize().padding(16.dp),// Agrega padding
+        modifier = Modifier.fillMaxSize().padding(16.dp),
         verticalArrangement = Arrangement.Top
-    ){
-        Text("MENU",
+    ) {
+        Text(
+            text = "MENU",
             style = MaterialTheme.typography.headlineMedium,
-            textAlign=TextAlign.Left ,
-            modifier = Modifier.fillMaxWidth().padding(top = 24.dp) ,
-            fontWeight = FontWeight.Bold, fontFamily=FontFamily.SansSerif,
+            textAlign = TextAlign.Left,
+            modifier = Modifier.fillMaxWidth().padding(top = 24.dp),
+            fontWeight = FontWeight.Bold,
+            fontFamily = FontFamily.SansSerif,
         )
+        
         HorizontalDivider(
             modifier = Modifier.padding(top = 8.dp),
             thickness = 2.dp,
             color = colorResource(id = R.color.gray)
         )
+        
         Spacer(modifier = Modifier.height(12.dp))
-        Row {
-            FilterChip(
-                selected = true,
-                onClick = { },
-                label = { Text("Entradas") }
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-
-            FilterChip(
-                selected = false,
-                onClick = { },
-                label = { Text("Platos Fuertes") }
-            )
-
-            Spacer(modifier = Modifier.width(8.dp))
-
-            FilterChip(
-                selected = false,
-                onClick = { },
-                label = { Text("Promociones") }
-            )
+        
+        CategoryFilterRow(
+            categories = categories,
+            selectedCategory = selectedCategory,
+            onCategorySelected = { selectedCategory = it }
+        )
+        
+        // Solo el ADMINISTRADOR puede ver el botón de agregar productos
+        if (userRole == "ADMIN") {
+            Spacer(modifier = Modifier.height(16.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center
+            ) {
+                FloatingActionButton(
+                    onClick = {
+                        navController.navigate("AddProductScreen")
+                    },
+                    containerColor = colorResource(id = R.color.esmeralda)
+                ) {
+                    Text(
+                        text = "+",
+                        style = MaterialTheme.typography.headlineMedium
+                    )
+                }
+            }
         }
+        
+        Spacer(modifier = Modifier.height(16.dp))
+
+        when (val state = uiState) {
+            is ProductUiState.Loading -> {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator()
+                }
+            }
+            is ProductUiState.Success -> {
+                val filteredProducts = state.products.filter { it.categoria == selectedCategory }
+                
+                if (filteredProducts.isEmpty()) {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Text(text = "No hay productos en $selectedCategory")
+                    }
+                } else {
+                    LazyVerticalGrid(
+                        columns = GridCells.Fixed(2),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        items(filteredProducts) { product ->
+                            ProductCard(
+                                product = product,
+                                isAdmin = userRole == "ADMIN",
+                                onDelete = { productViewModel.deleteProduct(it) },
+                                onEdit = {
+                                    navController.navigate("AddProductScreen?productId=${it.id}")
+                                }
+                            )
+                        }
+                    }
+                }
+            }
+            is ProductUiState.Error -> {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text(
+                        text = state.message,
+                        color = MaterialTheme.colorScheme.error,
+                        textAlign = TextAlign.Center
+                    )
+                }
+            }
         }
     }
+}

@@ -9,7 +9,6 @@ import javax.inject.Inject
 
 /**
  * Implementación de [ProductRepository].
- * Se encarga de la lógica de datos y el mapeo entre entidades y modelos de dominio.
  */
 class ProductRepositoryImpl @Inject constructor(
     private val productDao: ProductDao
@@ -21,5 +20,13 @@ class ProductRepositoryImpl @Inject constructor(
 
     override suspend fun addProduct(product: Product) {
         productDao.insert(product.toEntity())
+    }
+
+    override suspend fun updateProduct(product: Product) {
+        productDao.update(product.toEntity())
+    }
+
+    override suspend fun deleteProduct(product: Product) {
+        productDao.delete(product.toEntity())
     }
 }

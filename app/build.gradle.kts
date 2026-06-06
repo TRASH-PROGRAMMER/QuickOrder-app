@@ -55,7 +55,8 @@ dependencies {
     implementation("androidx.core:core-splashscreen:1.0.1")
     implementation("androidx.navigation:navigation-compose:2.7.7")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.6")
-
+    implementation("androidx.compose.material:material-icons-extended")
+    implementation(libs.androidx.material3)
     // Hilt
     implementation(libs.hilt.android)
     implementation(libs.androidx.hilt.navigation.compose)
@@ -68,6 +69,9 @@ dependencies {
 
     // DataStore
     implementation(libs.androidx.datastore.preferences)
+
+    // Coil (Image Loading)
+    implementation(libs.coil.compose)
 
     // Material Components
     implementation(libs.material)

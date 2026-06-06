@@ -32,5 +32,6 @@ data class ProductEntity(
     val descripcion: String,
     val imagenUrl: String = "",
     val categoria: String = "",
-    val descuento: Double = 0.0
+    val descuento: Double = 0.0,
+    val esPromocion: Boolean = false
 )

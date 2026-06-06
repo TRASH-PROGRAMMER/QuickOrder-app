@@ -3,9 +3,10 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Update
+import androidx.room.Delete
 import kotlinx.coroutines.flow.Flow
 import com.example.quickorderapp.data.local.entities.ProductEntity
-import androidx.room.Delete
 
 
 
@@ -19,6 +20,10 @@ interface ProductDao {
      fun getAll(): Flow<List<ProductEntity>>
      @Insert(onConflict = OnConflictStrategy.REPLACE)
      suspend fun insert(product: ProductEntity)
+
+     @Update
+     suspend fun update(product: ProductEntity)
+
      @Delete
      suspend fun delete(product: ProductEntity)
 }

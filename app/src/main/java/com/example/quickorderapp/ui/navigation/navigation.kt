@@ -6,23 +6,14 @@ import androidx.navigation.compose.rememberNavController
 import com.example.quickorderapp.ui.screens.login.LoginScreen
 import com.example.quickorderapp.ui.screens.home.HomeScreen
 import com.example.quickorderapp.ui.screens.login.RegisterScreen
+import com.example.quickorderapp.ui.screens.products.ProductScreen
+import com.example.quickorderapp.ui.screens.products.AddProductScreen
 
-
+import androidx.navigation.NavType
+import androidx.navigation.navArgument
 
 /**
-
  * Configura el gráfico de navegación de la aplicación.
-
- *
- * Este componente inicializa el [navController] y define el [NavHost],
-
- * asignando las rutas a sus respectivos componentes de pantalla, como Iniciar sesión,
-
- * Registrarse y Página de inicio.
-
- *
- * @param startDestination La ruta de la pantalla que se mostrará al iniciar la aplicación.
-
  */
 @Composable
 fun NavGraph(startDestination: String) {
@@ -30,8 +21,21 @@ fun NavGraph(startDestination: String) {
 
     NavHost(navController, startDestination = startDestination) {
 
-        composable("login") { LoginScreen(navController,) }
-        composable("register") {RegisterScreen (navController) }
+        composable("login") { LoginScreen(navController) }
+        composable("register") { RegisterScreen(navController) }
         composable("home") { HomeScreen(navController) }
+        composable("ProductScreen") { ProductScreen() }
+        composable(
+            route = "AddProductScreen?productId={productId}",
+            arguments = listOf(
+                navArgument("productId") {
+                    type = NavType.IntType
+                    defaultValue = -1
+                }
+            )
+        ) { backStackEntry ->
+            val productId = backStackEntry.arguments?.getInt("productId") ?: -1
+            AddProductScreen(navController, productId)
+        }
     }
 }
