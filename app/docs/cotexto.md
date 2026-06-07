@@ -423,15 +423,17 @@ Genera QR por mesa
 
 Comensal
 ↓
-Escanea QR
-↓
-Deep Link
-↓
-MenuScreen
-↓
-Consulta Room
-↓
-Visualiza menú
+Login
+  ↓
+Pantalla Escanear QR
+  ↓
+Escanear QR Mesa 5
+  ↓
+MenuScreen(Mesa 5)
+  ↓
+Seleccionar productos
+  ↓
+Confirmar pedido
 
 ## Beneficios
 
