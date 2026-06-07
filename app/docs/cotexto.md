@@ -412,28 +412,31 @@ Permitir acceso al menú sin conexión permanente a internet.
 QR + Deep Links + Room Database
 
 ### Flujo
-
 Administrador
-↓
-Carga menú
-↓
+    ↓
+Actualiza Menú
+    ↓
+Firebase
+    ↓
+Sincronización
+    ↓
 Room Database
-↓
-Genera QR por mesa
 
 Comensal
-↓
+    ↓
 Login
-  ↓
-Pantalla Escanear QR
-  ↓
-Escanear QR Mesa 5
-  ↓
-MenuScreen(Mesa 5)
-  ↓
-Seleccionar productos
-  ↓
-Confirmar pedido
+    ↓
+Escanear QR
+    ↓
+Mesa Detectada
+    ↓
+MenuScreen
+    ↓
+Pedido
+    ↓
+Room Database
+    ↓
+Firebase (cuando haya internet)
 
 ## Beneficios
 
@@ -451,11 +454,26 @@ Firebase Firestore + Room
 
 ### Room
 
-Fuente local de datos.
+Fuente principal durante operación offline. 
 
 ### Firebase
 
-Sincronización remota.
+Sincronización remota cuando exista conexión. 
+
+### Elementos Sincronizados
+
+Productos.
+Promociones.
+Pedidos.
+Estados de pedidos.
+Información de usuarios.
+
+### Estrategia Offline First
+
+Guardar datos localmente.
+Permitir operación sin internet.
+Sincronizar automáticamente al recuperar conexión.
+Resolver conflictos mediante timestamp.
 
 ### Beneficios
 
