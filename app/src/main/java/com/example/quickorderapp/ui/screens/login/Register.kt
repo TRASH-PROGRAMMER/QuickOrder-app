@@ -20,10 +20,6 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.quickorderapp.R
 
-/**
- * Función componible que representa la pantalla de registro.
- * Incluye validaciones, accesibilidad y mejoras de usabilidad.
- */
 @Composable
 fun RegisterScreen(navController: NavController) {
     var name by remember { mutableStateOf("") }
@@ -35,163 +31,126 @@ fun RegisterScreen(navController: NavController) {
     var passwordVisible by remember { mutableStateOf(false) }
     var confirmPasswordVisible by remember { mutableStateOf(false) }
 
-    // Validaciones
     val nameError = if (name.isNotBlank() && name.length < 3) "Nombre demasiado corto" else null
-    
-    val emailError = when {
-        emailInput.isEmpty() -> null
-        !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches() -> "Correo inválido"
-        else -> null
-    }
+    val emailError = if (emailInput.isNotEmpty() && !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) "Correo inválido" else null
+    val passwordError = if (password.isNotEmpty() && password.length < 4) "Mínimo 4 caracteres" else null
+    val confirmPasswordError = if (confirmPassword.isNotEmpty() && confirmPassword != password) "No coinciden" else null
 
-    val passwordError = when {
-        password.isEmpty() -> null
-        password.length < 8 -> "Mínimo 8 caracteres"
-        !password.any { it.isUpperCase() } -> "Falta una mayúscula"
-        !password.any { it.isDigit() } -> "Falta un número"
-        else -> null
-    }
-
-    val confirmPasswordError = when {
-        confirmPassword.isEmpty() -> null
-        confirmPassword != password -> "No coinciden"
-        else -> null
-    }
-
-    val isFormValid = name.isNotBlank() && 
-                     email.isNotBlank() && 
-                     password.isNotBlank() && 
-                     confirmPassword.isNotBlank() &&
-                     nameError == null && 
-                     emailError == null && 
-                     passwordError == null && 
-                     confirmPasswordError == null
+    val isFormValid = name.isNotBlank() && email.isNotBlank() && password.isNotBlank() && 
+                     confirmPassword.isNotBlank() && nameError == null && emailError == null && 
+                     passwordError == null && confirmPasswordError == null
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp)
-            .verticalScroll(rememberScrollState()),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
+            .verticalScroll(rememberScrollState())
+            .padding(24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = "REGISTRO",
+            text = "Crear Cuenta",
             style = MaterialTheme.typography.headlineMedium,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.fillMaxWidth(),
-            fontWeight = FontWeight.Bold
+            fontWeight = FontWeight.Bold,
+            textAlign = TextAlign.Center
         )
         
-        Spacer(Modifier.height(24.dp))
-
-        // Campo Nombre
-        OutlinedTextField(
-            value = name,
-            onValueChange = { name = it },
-            label = { Text("Nombre completo") },
-            isError = nameError != null,
-            supportingText = { nameError?.let { Text(it) } },
-            shape = RoundedCornerShape(12.dp),
-            modifier = Modifier.fillMaxWidth(),
-            singleLine = true,
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text)
+        Text(
+            text = "Únete a la experiencia QuickOrder",
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center
         )
 
-        Spacer(Modifier.height(8.dp))
+        Spacer(Modifier.height(32.dp))
 
-        // Campo Email
-        OutlinedTextField(
-            value = emailInput,
-            onValueChange = { emailInput = it },
-            label = { Text("Correo electrónico") },
-            isError = emailError != null,
-            supportingText = { emailError?.let { Text(it) } },
-            shape = RoundedCornerShape(12.dp),
+        ElevatedCard(
             modifier = Modifier.fillMaxWidth(),
-            singleLine = true,
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
-        )
-
-        Spacer(Modifier.height(8.dp))
-
-        // Campo Contraseña
-        OutlinedTextField(
-            value = password,
-            onValueChange = { password = it },
-            label = { Text("Contraseña") },
-            isError = passwordError != null,
-            supportingText = { passwordError?.let { Text(it) } },
-            shape = RoundedCornerShape(12.dp),
-            modifier = Modifier.fillMaxWidth(),
-            singleLine = true,
-            visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-            trailingIcon = {
-                Text(
-                    text = if (passwordVisible) "Ocultar" else "Mostrar",
-                    color = colorResource(R.color.esmeralda),
-                    modifier = Modifier
-                        .padding(end = 8.dp)
-                        .clickable { passwordVisible = !passwordVisible },
-                    style = MaterialTheme.typography.labelMedium
-                )
-            }
-        )
-
-        Spacer(Modifier.height(8.dp))
-
-        // Campo Confirmar Contraseña
-        OutlinedTextField(
-            value = confirmPassword,
-            onValueChange = { confirmPassword = it },
-            label = { Text("Confirmar Contraseña") },
-            isError = confirmPasswordError != null,
-            supportingText = { confirmPasswordError?.let { Text(it) } },
-            shape = RoundedCornerShape(12.dp),
-            modifier = Modifier.fillMaxWidth(),
-            singleLine = true,
-            visualTransformation = if (confirmPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-            trailingIcon = {
-                Text(
-                    text = if (confirmPasswordVisible) "Ocultar" else "Mostrar",
-                    color = colorResource(R.color.esmeralda),
-                    modifier = Modifier
-                        .padding(end = 8.dp)
-                        .clickable { confirmPasswordVisible = !confirmPasswordVisible },
-                    style = MaterialTheme.typography.labelMedium
-                )
-            }
-        )
-
-        Spacer(Modifier.height(24.dp))
-
-        Button(
-            enabled = isFormValid,
-            onClick = {
-                // Lógica de registro
-                navController.popBackStack()
-            },
-            colors = ButtonDefaults.buttonColors(
-                containerColor = colorResource(R.color.esmeralda)
-            ),
-            modifier = Modifier.fillMaxWidth().height(50.dp)
+            shape = RoundedCornerShape(24.dp)
         ) {
-            Text("Crear Cuenta", style = MaterialTheme.typography.bodyLarge)
+            Column(
+                modifier = Modifier.padding(24.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                OutlinedTextField(
+                    value = name,
+                    onValueChange = { name = it },
+                    label = { Text("Nombre completo") },
+                    isError = nameError != null,
+                    supportingText = { nameError?.let { Text(it) } },
+                    shape = RoundedCornerShape(12.dp),
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true
+                )
+
+                OutlinedTextField(
+                    value = emailInput,
+                    onValueChange = { emailInput = it },
+                    label = { Text("Correo electrónico") },
+                    isError = emailError != null,
+                    supportingText = { emailError?.let { Text(it) } },
+                    shape = RoundedCornerShape(12.dp),
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
+                )
+
+                OutlinedTextField(
+                    value = password,
+                    onValueChange = { password = it },
+                    label = { Text("Contraseña") },
+                    isError = passwordError != null,
+                    supportingText = { passwordError?.let { Text(it) } },
+                    shape = RoundedCornerShape(12.dp),
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true,
+                    visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                    trailingIcon = {
+                        TextButton(onClick = { passwordVisible = !passwordVisible }) {
+                            Text(if (passwordVisible) "Ocultar" else "Mostrar", color = colorResource(R.color.esmeralda))
+                        }
+                    }
+                )
+
+                OutlinedTextField(
+                    value = confirmPassword,
+                    onValueChange = { confirmPassword = it },
+                    label = { Text("Confirmar contraseña") },
+                    isError = confirmPasswordError != null,
+                    supportingText = { confirmPasswordError?.let { Text(it) } },
+                    shape = RoundedCornerShape(12.dp),
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true,
+                    visualTransformation = if (confirmPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                    trailingIcon = {
+                        TextButton(onClick = { confirmPasswordVisible = !confirmPasswordVisible }) {
+                            Text(if (confirmPasswordVisible) "Ocultar" else "Mostrar", color = colorResource(R.color.esmeralda))
+                        }
+                    }
+                )
+
+                Button(
+                    enabled = isFormValid,
+                    onClick = { navController.popBackStack() },
+                    colors = ButtonDefaults.buttonColors(containerColor = colorResource(R.color.esmeralda)),
+                    modifier = Modifier.fillMaxWidth().height(56.dp),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Text("Registrarse", style = MaterialTheme.typography.titleMedium)
+                }
+            }
         }
 
-        Spacer(Modifier.height(16.dp))
+        Spacer(Modifier.height(24.dp))
 
-        Text(
-            text = "¿Ya tienes cuenta? Inicia sesión",
-            color = colorResource(R.color.esmeralda),
-            textAlign = TextAlign.Center,
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable {
-                    navController.popBackStack()
-                }
-        )
+        TextButton(onClick = { navController.popBackStack() }) {
+            Text(
+                "¿Ya tienes cuenta? Inicia sesión",
+                color = colorResource(R.color.esmeralda),
+                style = MaterialTheme.typography.bodyLarge
+            )
+        }
     }
 }

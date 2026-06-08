@@ -4,10 +4,10 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.quickorderapp.ui.screens.login.LoginScreen
-import com.example.quickorderapp.ui.screens.home.HomeScreen
 import com.example.quickorderapp.ui.screens.login.RegisterScreen
 import com.example.quickorderapp.ui.screens.products.ProductScreen
 import com.example.quickorderapp.ui.screens.products.AddProductScreen
+import com.example.quickorderapp.ui.screens.MainScreen
 
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
@@ -23,7 +23,8 @@ fun NavGraph(startDestination: String) {
 
         composable("login") { LoginScreen(navController) }
         composable("register") { RegisterScreen(navController) }
-        composable("home") { HomeScreen(navController) }
+        composable("main") { MainScreen(navController) }
+        composable("home") { MainScreen(navController) } // Redirigir a MainScreen si se intenta ir a home
         composable("ProductScreen") { ProductScreen() }
         composable(
             route = "AddProductScreen?productId={productId}",

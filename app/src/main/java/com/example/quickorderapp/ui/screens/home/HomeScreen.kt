@@ -2,7 +2,6 @@ package com.example.quickorderapp.ui.screens.home
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -11,7 +10,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.colorResource
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -24,6 +22,7 @@ import com.example.quickorderapp.viewmodel.HomeViewModel
 import com.example.quickorderapp.viewmodel.ProductUiState
 import com.example.quickorderapp.viewmodel.ProductViewModel
 
+@OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedBoxWithConstraintsScope")
 @Composable
 fun HomeScreen(
@@ -36,40 +35,20 @@ fun HomeScreen(
     val uiState by productViewModel.uiState.collectAsState()
     val userRole by homeViewModel.userRole.collectAsState()
 
-    Column(
-        modifier = Modifier.fillMaxSize().padding(16.dp),
-        verticalArrangement = Arrangement.Top
-    ) {
-        Text(
-            text = "MENU",
-            style = MaterialTheme.typography.headlineMedium,
-            textAlign = TextAlign.Left,
-            modifier = Modifier.fillMaxWidth().padding(top = 24.dp),
-            fontWeight = FontWeight.Bold,
-            fontFamily = FontFamily.SansSerif,
-        )
-        
-        HorizontalDivider(
-            modifier = Modifier.padding(top = 8.dp),
-            thickness = 2.dp,
-            color = colorResource(id = R.color.gray)
-        )
-        
-        Spacer(modifier = Modifier.height(12.dp))
-        
-        CategoryFilterRow(
-            categories = categories,
-            selectedCategory = selectedCategory,
-            onCategorySelected = { selectedCategory = it }
-        )
-        
-        // Solo el ADMINISTRADOR puede ver el botón de agregar productos
-        if (userRole == "ADMIN") {
-            Spacer(modifier = Modifier.height(16.dp))
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center
-            ) {
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { 
+                    Text(
+                        "MENU", 
+                        fontWeight = FontWeight.Bold,
+                        style = MaterialTheme.typography.headlineSmall
+                    ) 
+                }
+            )
+        },
+        floatingActionButton = {
+            if (userRole == "ADMIN") {
                 FloatingActionButton(
                     onClick = {
                         navController.navigate("AddProductScreen")
@@ -78,54 +57,75 @@ fun HomeScreen(
                 ) {
                     Text(
                         text = "+",
-                        style = MaterialTheme.typography.headlineMedium
+                        style = MaterialTheme.typography.headlineMedium,
+                        color = MaterialTheme.colorScheme.onPrimary
                     )
                 }
             }
         }
-        
-        Spacer(modifier = Modifier.height(16.dp))
+    ) { padding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+                .padding(horizontal = 16.dp),
+            verticalArrangement = Arrangement.Top
+        ) {
+            CategoryFilterRow(
+                categories = categories,
+                selectedCategory = selectedCategory,
+                onCategorySelected = { selectedCategory = it },
+                modifier = Modifier.padding(vertical = 8.dp)
+            )
+            
+            Spacer(modifier = Modifier.height(8.dp))
 
-        when (val state = uiState) {
-            is ProductUiState.Loading -> {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator()
-                }
-            }
-            is ProductUiState.Success -> {
-                val filteredProducts = state.products.filter { it.categoria == selectedCategory }
-                
-                if (filteredProducts.isEmpty()) {
+            when (val state = uiState) {
+                is ProductUiState.Loading -> {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        Text(text = "No hay productos en $selectedCategory")
+                        CircularProgressIndicator()
                     }
-                } else {
-                    LazyVerticalGrid(
-                        columns = GridCells.Fixed(2),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp),
-                        modifier = Modifier.fillMaxSize()
-                    ) {
-                        items(filteredProducts) { product ->
-                            ProductCard(
-                                product = product,
-                                isAdmin = userRole == "ADMIN",
-                                onDelete = { productViewModel.deleteProduct(it) },
-                                onEdit = {
-                                    navController.navigate("AddProductScreen?productId=${it.id}")
-                                }
+                }
+                is ProductUiState.Success -> {
+                    val filteredProducts = state.products.filter { it.categoria == selectedCategory }
+                    
+                    if (filteredProducts.isEmpty()) {
+                        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                            Text(
+                                text = "No hay productos en $selectedCategory",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
+                        }
+                    } else {
+                        LazyVerticalGrid(
+                            columns = GridCells.Adaptive(minSize = 150.dp),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp),
+                            verticalArrangement = Arrangement.spacedBy(12.dp),
+                            modifier = Modifier.fillMaxSize(),
+                            contentPadding = PaddingValues(bottom = 16.dp)
+                        ) {
+                            items(filteredProducts) { product ->
+                                ProductCard(
+                                    product = product,
+                                    isAdmin = userRole == "ADMIN",
+                                    onDelete = { productViewModel.deleteProduct(it) },
+                                    onEdit = {
+                                        navController.navigate("AddProductScreen?productId=${it.id}")
+                                    }
+                                )
+                            }
                         }
                     }
                 }
-            }
-            is ProductUiState.Error -> {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text(
-                        text = state.message,
-                        color = MaterialTheme.colorScheme.error,
-                        textAlign = TextAlign.Center
-                    )
+                is ProductUiState.Error -> {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Text(
+                            text = state.message,
+                            color = MaterialTheme.colorScheme.error,
+                            textAlign = TextAlign.Center
+                        )
+                    }
                 }
             }
         }
