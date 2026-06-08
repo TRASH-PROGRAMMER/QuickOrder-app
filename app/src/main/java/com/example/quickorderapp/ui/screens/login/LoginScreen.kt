@@ -34,19 +34,22 @@ fun LoginScreen(
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
 
+    // Validaciones con mensajes amigables
     val emailError = when {
-        email.isBlank() -> null // No mostrar error al inicio
-        !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches() -> "Ingrese un correo válido"
+        emailInput.isEmpty() -> null
+        !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches() -> "Ese correo no parece válido, ¡revísalo!"
         else -> null
     }
 
     val passwordError = when {
-        password.isBlank() -> null // No mostrar error al inicio
-        password.length < 4 -> "Mínimo 4 caracteres"
+        password.isEmpty() -> null
+        password.length < 8 -> "Para tu seguridad, usa al menos 8 caracteres"
+        !password.any { it.isUpperCase() } -> "¡No olvides incluir una mayúscula!"
+        !password.any { it.isDigit() } -> "Añade al menos un número"
         else -> null
     }
 
-    val isFormValid = emailError == null && passwordError == null && email.isNotBlank() && password.isNotBlank()
+    val isFormValid = emailError == null && passwordError == null && email.isNotBlank() && password.length >= 8
 
     Column(
         modifier = Modifier
@@ -57,7 +60,7 @@ fun LoginScreen(
         verticalArrangement = Arrangement.Center
     ) {
         Image(
-            painter = painterResource(id = R.drawable.logo_quickorder),
+            painter = painterResource(id = R.drawable.ic_logo), // Cambiado a ic_logo que vi en el historial
             contentDescription = "QuickOrder Logo",
             modifier = Modifier.size(120.dp)
         )
@@ -65,14 +68,14 @@ fun LoginScreen(
         Spacer(modifier = Modifier.height(16.dp))
 
         Text(
-            text = "Bienvenido a QuickOrder",
+            text = "¡Hola de nuevo!",
             style = MaterialTheme.typography.headlineMedium,
             fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Center
         )
 
         Text(
-            text = "Realiza tus pedidos desde tu mesa",
+            text = "Ingresa para gestionar tus pedidos",
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center
@@ -104,7 +107,7 @@ fun LoginScreen(
                 OutlinedTextField(
                     value = password,
                     onValueChange = { password = it },
-                    label = { Text("Contraseña") },
+                    label = { Text("Tu contraseña") },
                     shape = RoundedCornerShape(12.dp),
                     singleLine = true,
                     isError = passwordError != null,
@@ -126,7 +129,7 @@ fun LoginScreen(
                     enabled = isFormValid,
                     onClick = {
                         viewModel.login(email)
-                        navController.navigate("main") {
+                        navController.navigate("home") {
                             popUpTo("login") { inclusive = true }
                         }
                     },
@@ -138,7 +141,7 @@ fun LoginScreen(
                         .height(56.dp),
                     shape = RoundedCornerShape(12.dp)
                 ) {
-                    Text("Iniciar sesión", style = MaterialTheme.typography.titleMedium)
+                    Text("¡Entrar!", style = MaterialTheme.typography.titleMedium)
                 }
             }
         }
@@ -156,7 +159,7 @@ fun LoginScreen(
             )
         ) {
             Text(
-                "Crear cuenta",
+                "Quiero crear una cuenta",
                 style = MaterialTheme.typography.titleMedium,
                 color = colorResource(R.color.esmeralda)
             )

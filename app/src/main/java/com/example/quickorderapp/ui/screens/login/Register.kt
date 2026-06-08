@@ -31,14 +31,39 @@ fun RegisterScreen(navController: NavController) {
     var passwordVisible by remember { mutableStateOf(false) }
     var confirmPasswordVisible by remember { mutableStateOf(false) }
 
-    val nameError = if (name.isNotBlank() && name.length < 3) "Nombre demasiado corto" else null
-    val emailError = if (emailInput.isNotEmpty() && !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) "Correo inválido" else null
-    val passwordError = if (password.isNotEmpty() && password.length < 4) "Mínimo 4 caracteres" else null
-    val confirmPasswordError = if (confirmPassword.isNotEmpty() && confirmPassword != password) "No coinciden" else null
+    // Validaciones amigables
+    val nameError = when {
+        name.isEmpty() -> null
+        name.length < 3 -> "Tu nombre debe tener al menos 3 letras"
+        else -> null
+    }
 
-    val isFormValid = name.isNotBlank() && email.isNotBlank() && password.isNotBlank() && 
-                     confirmPassword.isNotBlank() && nameError == null && emailError == null && 
-                     passwordError == null && confirmPasswordError == null
+    val emailError = when {
+        emailInput.isEmpty() -> null
+        !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches() -> "Ese correo no parece correcto, ¡revísalo!"
+        else -> null
+    }
+
+    val passwordError = when {
+        password.isEmpty() -> null
+        password.length < 8 -> "Usa al menos 8 caracteres para que sea segura"
+        !password.any { it.isUpperCase() } -> "¡No olvides incluir una mayúscula!"
+        !password.any { it.isDigit() } -> "Añade al menos un número"
+        else -> null
+    }
+
+    val confirmPasswordError = when {
+        confirmPassword.isEmpty() -> null
+        confirmPassword != password -> "¡Ups! Las contraseñas no coinciden"
+        else -> null
+    }
+
+    val isFormValid = name.length >= 3 && 
+                     android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches() && 
+                     password.length >= 8 && 
+                     password.any { it.isUpperCase() } && 
+                     password.any { it.isDigit() } &&
+                     confirmPassword == password
 
     Column(
         modifier = Modifier
@@ -49,14 +74,14 @@ fun RegisterScreen(navController: NavController) {
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = "Crear Cuenta",
+            text = "¡Crea tu cuenta!",
             style = MaterialTheme.typography.headlineMedium,
             fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Center
         )
         
         Text(
-            text = "Únete a la experiencia QuickOrder",
+            text = "Únete a la familia QuickOrder",
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center
@@ -75,18 +100,19 @@ fun RegisterScreen(navController: NavController) {
                 OutlinedTextField(
                     value = name,
                     onValueChange = { name = it },
-                    label = { Text("Nombre completo") },
+                    label = { Text("¿Cómo te llamas?") },
                     isError = nameError != null,
                     supportingText = { nameError?.let { Text(it) } },
                     shape = RoundedCornerShape(12.dp),
                     modifier = Modifier.fillMaxWidth(),
-                    singleLine = true
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text)
                 )
 
                 OutlinedTextField(
                     value = emailInput,
                     onValueChange = { emailInput = it },
-                    label = { Text("Correo electrónico") },
+                    label = { Text("Tu correo electrónico") },
                     isError = emailError != null,
                     supportingText = { emailError?.let { Text(it) } },
                     shape = RoundedCornerShape(12.dp),
@@ -98,7 +124,7 @@ fun RegisterScreen(navController: NavController) {
                 OutlinedTextField(
                     value = password,
                     onValueChange = { password = it },
-                    label = { Text("Contraseña") },
+                    label = { Text("Crea una contraseña") },
                     isError = passwordError != null,
                     supportingText = { passwordError?.let { Text(it) } },
                     shape = RoundedCornerShape(12.dp),
@@ -116,7 +142,7 @@ fun RegisterScreen(navController: NavController) {
                 OutlinedTextField(
                     value = confirmPassword,
                     onValueChange = { confirmPassword = it },
-                    label = { Text("Confirmar contraseña") },
+                    label = { Text("Confirma tu contraseña") },
                     isError = confirmPasswordError != null,
                     supportingText = { confirmPasswordError?.let { Text(it) } },
                     shape = RoundedCornerShape(12.dp),
@@ -138,7 +164,7 @@ fun RegisterScreen(navController: NavController) {
                     modifier = Modifier.fillMaxWidth().height(56.dp),
                     shape = RoundedCornerShape(12.dp)
                 ) {
-                    Text("Registrarse", style = MaterialTheme.typography.titleMedium)
+                    Text("¡Listo, registrarme!", style = MaterialTheme.typography.titleMedium)
                 }
             }
         }
@@ -147,7 +173,7 @@ fun RegisterScreen(navController: NavController) {
 
         TextButton(onClick = { navController.popBackStack() }) {
             Text(
-                "¿Ya tienes cuenta? Inicia sesión",
+                "¿Ya tienes cuenta? Inicia sesión aquí",
                 color = colorResource(R.color.esmeralda),
                 style = MaterialTheme.typography.bodyLarge
             )
