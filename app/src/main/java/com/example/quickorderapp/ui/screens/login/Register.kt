@@ -17,16 +17,23 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.quickorderapp.R
+import com.example.quickorderapp.domain.model.User
+import com.example.quickorderapp.viewmodel.RegisterViewModel
 
 @Composable
-fun RegisterScreen(navController: NavController) {
+fun RegisterScreen(
+    navController: NavController,
+    viewModel: RegisterViewModel = hiltViewModel()
+) {
     var name by remember { mutableStateOf("") }
     var emailInput by remember { mutableStateOf("") }
     val email = emailInput.trim().lowercase()
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
+    var selectedRole by remember { mutableStateOf("MESERO") }
 
     var passwordVisible by remember { mutableStateOf(false) }
     var confirmPasswordVisible by remember { mutableStateOf(false) }
@@ -121,6 +128,21 @@ fun RegisterScreen(navController: NavController) {
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
                 )
 
+                Text("Selecciona tu rol:", style = MaterialTheme.typography.labelLarge)
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    RadioButton(
+                        selected = selectedRole == "MESERO",
+                        onClick = { selectedRole = "MESERO" }
+                    )
+                    Text("Mesero", modifier = Modifier.clickable { selectedRole = "MESERO" })
+                    Spacer(Modifier.width(16.dp))
+                    RadioButton(
+                        selected = selectedRole == "ADMIN",
+                        onClick = { selectedRole = "ADMIN" }
+                    )
+                    Text("Administrador", modifier = Modifier.clickable { selectedRole = "ADMIN" })
+                }
+
                 OutlinedTextField(
                     value = password,
                     onValueChange = { password = it },
@@ -159,7 +181,17 @@ fun RegisterScreen(navController: NavController) {
 
                 Button(
                     enabled = isFormValid,
-                    onClick = { navController.popBackStack() },
+                    onClick = {
+                        val newUser = User(
+                            nombre = name,
+                            correo = email,
+                            rol = selectedRole,
+                            password = password
+                        )
+                        viewModel.register(newUser) {
+                            navController.popBackStack()
+                        }
+                    },
                     colors = ButtonDefaults.buttonColors(containerColor = colorResource(R.color.esmeralda)),
                     modifier = Modifier.fillMaxWidth().height(56.dp),
                     shape = RoundedCornerShape(12.dp)

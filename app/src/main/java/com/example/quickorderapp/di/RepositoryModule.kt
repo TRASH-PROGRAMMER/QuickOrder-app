@@ -1,6 +1,8 @@
 package com.example.quickorderapp.di
 
+import com.example.quickorderapp.data.repository.AuthRepositoryImpl
 import com.example.quickorderapp.data.repository.ProductRepositoryImpl
+import com.example.quickorderapp.domain.repository.AuthRepository
 import com.example.quickorderapp.domain.repository.ProductRepository
 import dagger.Binds
 import dagger.Module
@@ -20,4 +22,10 @@ abstract class RepositoryModule {
     abstract fun bindProductRepository(
         productRepositoryImpl: ProductRepositoryImpl
     ): ProductRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindAuthRepository(
+        authRepositoryImpl: AuthRepositoryImpl
+    ): AuthRepository
 }

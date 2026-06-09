@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.quickorderapp.R
+import com.example.quickorderapp.viewmodel.LoginUiState
 import com.example.quickorderapp.viewmodel.LoginViewModel
 
 @Composable
@@ -29,6 +30,8 @@ fun LoginScreen(
     navController: NavController,
     viewModel: LoginViewModel = hiltViewModel()
 ) {
+    val uiState by viewModel.uiState.collectAsState()
+    
     var emailInput by remember { mutableStateOf("") }
     val email = emailInput.trim().lowercase()
     var password by remember { mutableStateOf("") }
@@ -51,6 +54,14 @@ fun LoginScreen(
 
     val isFormValid = emailError == null && passwordError == null && email.isNotBlank() && password.length >= 8
 
+    LaunchedEffect(uiState) {
+        if (uiState is LoginUiState.Success) {
+            navController.navigate("home") {
+                popUpTo("login") { inclusive = true }
+            }
+        }
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -60,7 +71,7 @@ fun LoginScreen(
         verticalArrangement = Arrangement.Center
     ) {
         Image(
-            painter = painterResource(id = R.drawable.ic_logo), // Cambiado a ic_logo que vi en el historial
+            painter = painterResource(id = R.drawable.ic_logo),
             contentDescription = "QuickOrder Logo",
             modifier = Modifier.size(120.dp)
         )
@@ -82,6 +93,14 @@ fun LoginScreen(
         )
 
         Spacer(modifier = Modifier.height(32.dp))
+
+        if (uiState is LoginUiState.Error) {
+            Text(
+                text = (uiState as LoginUiState.Error).message,
+                color = MaterialTheme.colorScheme.error,
+                modifier = Modifier.padding(bottom = 16.dp)
+            )
+        }
 
         ElevatedCard(
             modifier = Modifier.fillMaxWidth(),
@@ -126,12 +145,9 @@ fun LoginScreen(
                 )
 
                 Button(
-                    enabled = isFormValid,
+                    enabled = isFormValid && uiState !is LoginUiState.Loading,
                     onClick = {
-                        viewModel.login(email)
-                        navController.navigate("home") {
-                            popUpTo("login") { inclusive = true }
-                        }
+                        viewModel.login(email, password)
                     },
                     colors = ButtonDefaults.buttonColors(
                         containerColor = colorResource(R.color.esmeralda)
@@ -141,7 +157,11 @@ fun LoginScreen(
                         .height(56.dp),
                     shape = RoundedCornerShape(12.dp)
                 ) {
-                    Text("¡Entrar!", style = MaterialTheme.typography.titleMedium)
+                    if (uiState is LoginUiState.Loading) {
+                        CircularProgressIndicator(color = MaterialTheme.colorScheme.onPrimary, modifier = Modifier.size(24.dp))
+                    } else {
+                        Text("¡Entrar!", style = MaterialTheme.typography.titleMedium)
+                    }
                 }
             }
         }
@@ -149,7 +169,10 @@ fun LoginScreen(
         Spacer(modifier = Modifier.height(24.dp))
 
         OutlinedButton(
-            onClick = { navController.navigate("register") },
+            onClick = { 
+                viewModel.resetState()
+                navController.navigate("register") 
+            },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(56.dp),

@@ -451,7 +451,6 @@ Firebase (cuando haya internet)
 ## Estrategia
 
 Firebase Firestore + Room
-
 ### Room
 
 Fuente principal durante operación offline. 
