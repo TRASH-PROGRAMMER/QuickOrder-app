@@ -14,26 +14,48 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.example.quickorderapp.R
+import com.example.quickorderapp.domain.model.Product
 import com.example.quickorderapp.ui.components.CategoryFilterRow
 import com.example.quickorderapp.ui.components.ProductCard
 import com.example.quickorderapp.viewmodel.HomeViewModel
 import com.example.quickorderapp.viewmodel.ProductUiState
 import com.example.quickorderapp.viewmodel.ProductViewModel
 
-@OptIn(ExperimentalMaterial3Api::class)
-@SuppressLint("UnusedBoxWithConstraintsScope")
 @Composable
 fun HomeScreen(
     navController: NavController,
     productViewModel: ProductViewModel = hiltViewModel(),
     homeViewModel: HomeViewModel = hiltViewModel()
 ) {
+    // 1. collectAsStateWithLifecycle para cumplimiento MAD Skills
+    val uiState by productViewModel.uiState.collectAsStateWithLifecycle()
+    val userRole by homeViewModel.userRole.collectAsStateWithLifecycle()
+
+    // 2. State Hoisting: Delegamos la UI al componente Stateless
+    HomeScreenContent(
+        uiState = uiState,
+        userRole = userRole,
+        onAddProduct = { navController.navigate("AddProductScreen") },
+        onEditProduct = { navController.navigate("AddProductScreen?productId=${it.id}") },
+        onDeleteProduct = { productViewModel.deleteProduct(it) }
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@SuppressLint("UnusedBoxWithConstraintsScope")
+@Composable
+fun HomeScreenContent(
+    uiState: ProductUiState,
+    userRole: String,
+    onAddProduct: () -> Unit,
+    onEditProduct: (Product) -> Unit,
+    onDeleteProduct: (Product) -> Unit
+) {
     var selectedCategory by remember { mutableStateOf("Entradas") }
     val categories = listOf("Entradas", "Platos Fuertes", "Promociones", "Bebidas", "Postres")
-    val uiState by productViewModel.uiState.collectAsState()
-    val userRole by homeViewModel.userRole.collectAsState()
 
     Scaffold(
         topBar = {
@@ -50,16 +72,10 @@ fun HomeScreen(
         floatingActionButton = {
             if (userRole == "ADMIN") {
                 FloatingActionButton(
-                    onClick = {
-                        navController.navigate("AddProductScreen")
-                    },
+                    onClick = onAddProduct,
                     containerColor = colorResource(id = R.color.esmeralda)
                 ) {
-                    Text(
-                        text = "+",
-                        style = MaterialTheme.typography.headlineMedium,
-                        color = MaterialTheme.colorScheme.onPrimary
-                    )
+                    Text("+", style = MaterialTheme.typography.headlineMedium, color = MaterialTheme.colorScheme.onPrimary)
                 }
             }
         }
@@ -80,14 +96,14 @@ fun HomeScreen(
             
             Spacer(modifier = Modifier.height(8.dp))
 
-            when (val state = uiState) {
+            when (uiState) {
                 is ProductUiState.Loading -> {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         CircularProgressIndicator()
                     }
                 }
                 is ProductUiState.Success -> {
-                    val filteredProducts = state.products.filter { it.categoria == selectedCategory }
+                    val filteredProducts = uiState.products.filter { it.categoria == selectedCategory }
                     
                     if (filteredProducts.isEmpty()) {
                         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -109,10 +125,8 @@ fun HomeScreen(
                                 ProductCard(
                                     product = product,
                                     isAdmin = userRole == "ADMIN",
-                                    onDelete = { productViewModel.deleteProduct(it) },
-                                    onEdit = {
-                                        navController.navigate("AddProductScreen?productId=${it.id}")
-                                    }
+                                    onDelete = onDeleteProduct,
+                                    onEdit = onEditProduct
                                 )
                             }
                         }
@@ -120,11 +134,7 @@ fun HomeScreen(
                 }
                 is ProductUiState.Error -> {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        Text(
-                            text = state.message,
-                            color = MaterialTheme.colorScheme.error,
-                            textAlign = TextAlign.Center
-                        )
+                        Text(text = uiState.message, color = MaterialTheme.colorScheme.error)
                     }
                 }
             }

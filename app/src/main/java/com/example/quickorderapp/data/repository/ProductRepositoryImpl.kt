@@ -33,7 +33,11 @@ class ProductRepositoryImpl @Inject constructor(
         
         // Sincronizar con Firebase
         if (syncManager.hasInternetConnection()) {
-            firebaseProductDataSource.addProduct(product)
+            try {
+                firebaseProductDataSource.addProduct(product)
+            } catch (e: Exception) {
+                // El dato persiste en Room, se sincronizará luego
+            }
         }
     }
 
@@ -41,7 +45,9 @@ class ProductRepositoryImpl @Inject constructor(
         productDao.update(product.toEntity())
         
         if (syncManager.hasInternetConnection()) {
-            firebaseProductDataSource.updateProduct(product)
+            try {
+                firebaseProductDataSource.updateProduct(product)
+            } catch (e: Exception) { }
         }
     }
 
@@ -49,7 +55,9 @@ class ProductRepositoryImpl @Inject constructor(
         productDao.delete(product.toEntity())
         
         if (syncManager.hasInternetConnection()) {
-            firebaseProductDataSource.deleteProduct(product)
+            try {
+                firebaseProductDataSource.deleteProduct(product)
+            } catch (e: Exception) { }
         }
     }
 }

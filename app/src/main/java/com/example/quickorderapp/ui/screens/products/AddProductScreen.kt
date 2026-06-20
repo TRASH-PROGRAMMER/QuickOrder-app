@@ -16,7 +16,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material3.*
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -24,9 +23,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.quickorderapp.R
@@ -34,15 +35,34 @@ import com.example.quickorderapp.domain.model.Product
 import com.example.quickorderapp.viewmodel.ProductUiState
 import com.example.quickorderapp.viewmodel.ProductViewModel
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddProductScreen(
     navController: NavController,
     productId: Int = -1,
     viewModel: ProductViewModel = hiltViewModel()
 ) {
-    val uiState by viewModel.uiState.collectAsState()
-    
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
+    AddProductScreenContent(
+        productId = productId,
+        uiState = uiState,
+        onBack = { navController.popBackStack() },
+        onSave = { product ->
+            if (productId == -1) viewModel.addProduct(product)
+            else viewModel.updateProduct(product)
+            navController.popBackStack()
+        }
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun AddProductScreenContent(
+    productId: Int,
+    uiState: ProductUiState,
+    onBack: () -> Unit,
+    onSave: (Product) -> Unit
+) {
     var nombre by remember { mutableStateOf("") }
     var precio by remember { mutableStateOf("") }
     var descripcion by remember { mutableStateOf("") }
@@ -53,18 +73,12 @@ fun AddProductScreen(
 
     val photoPickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia(),
-        onResult = { uri ->
-            if (uri != null) {
-                imagenUrl = uri.toString()
-            }
-        }
+        onResult = { uri -> uri?.let { imagenUrl = it.toString() } }
     )
 
-    // Cargar datos si estamos editando
     LaunchedEffect(uiState) {
         if (productId != -1 && uiState is ProductUiState.Success) {
-            val product = (uiState as ProductUiState.Success).products.find { it.id == productId }
-            product?.let {
+            uiState.products.find { it.id == productId }?.let {
                 nombre = it.nombre
                 precio = it.precio.toString()
                 descripcion = it.descripcion
@@ -81,7 +95,7 @@ fun AddProductScreen(
             TopAppBar(
                 title = { Text(if (productId == -1) "Nuevo Producto" else "Editar Producto") },
                 navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
+                    IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Atrás")
                     }
                 }
@@ -96,7 +110,6 @@ fun AddProductScreen(
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            // Selector de Imagen
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -104,41 +117,34 @@ fun AddProductScreen(
                     .clip(RoundedCornerShape(12.dp))
                     .background(Color.LightGray.copy(alpha = 0.3f))
                     .border(1.dp, Color.Green, RoundedCornerShape(12.dp))
-                    .clickable {
-                        photoPickerLauncher.launch(
-                            PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
-                        )
-                    },
+                    .clickable { photoPickerLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) },
                 contentAlignment = Alignment.Center
             ) {
-                if (imagenUrl.isNotBlank()) {
-                    AsyncImage(
-                        model = imagenUrl,
-                        contentDescription = "Imagen seleccionada",
-                        modifier = Modifier.fillMaxSize(),
-                        contentScale = ContentScale.Crop
-                    )
-                } else {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Icon(
-                            Icons.Default.AddCircle,
-                            contentDescription = null,
-                            modifier = Modifier.size(48.dp),
-                            tint = Color.Gray
-                        )
-                        Text("Toca para añadir foto de la galería", color = Color.Gray)
-                    }
+                if (imagenUrl.isNotBlank()) AsyncImage(model = imagenUrl, contentDescription = null, modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
+                else Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Icon(Icons.Default.AddCircle, contentDescription = null, modifier = Modifier.size(48.dp), tint = Color.Gray)
+                    Text("Toca para añadir foto", color = Color.Gray)
                 }
             }
 
             OutlinedTextField(
-                value = nombre,
-                onValueChange = { nombre = it },
-                label = { Text("Nombre del producto") },
+                value = nombre, 
+                onValueChange = { nombre = it }, 
+                label = { Text("Nombre del producto") }, 
                 modifier = Modifier.fillMaxWidth(),
-                singleLine = true,
-                minLines = 1,
-                maxLines = 1,
+                shape = RoundedCornerShape(12.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = colorResource(R.color.esmeralda),
+                    unfocusedBorderColor = colorResource(R.color.esmeralda)
+                )
+            )
+            
+            OutlinedTextField(
+                value = precio, 
+                onValueChange = { if (it.all { c -> c.isDigit() || c == '.' }) precio = it }, 
+                label = { Text("Precio") }, 
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal), 
+                modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = colorResource(R.color.esmeralda),
@@ -147,28 +153,11 @@ fun AddProductScreen(
             )
 
             OutlinedTextField(
-                value = precio,
-                onValueChange = { if (it.all { char -> char.isDigit() || char == '.' }) precio = it },
-                label = { Text("Precio") },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true,
-                minLines = 1,
-                maxLines = 1,
-                shape = RoundedCornerShape(12.dp),
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = colorResource(R.color.esmeralda),
-                    unfocusedBorderColor = colorResource(R.color.esmeralda)
-             )
-            )
-
-            OutlinedTextField(
-                value = descripcion,
-                onValueChange = { descripcion = it },
-                label = { Text("Descripción") },
-                modifier = Modifier.fillMaxWidth(),
+                value = descripcion, 
+                onValueChange = { descripcion = it }, 
+                label = { Text("Descripción") }, 
+                modifier = Modifier.fillMaxWidth(), 
                 minLines = 3,
-                maxLines = 3,
                 shape = RoundedCornerShape(12.dp),
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = colorResource(R.color.esmeralda),
@@ -177,15 +166,9 @@ fun AddProductScreen(
             )
 
             Text("Categoría", style = MaterialTheme.typography.labelLarge)
-            val categories = listOf("Entradas", "Platos Fuertes", "Bebidas", "Postres")
             Row(Modifier.horizontalScroll(rememberScrollState())) {
-                categories.forEach { cat ->
-                    FilterChip(
-                        selected = categoria == cat,
-                        onClick = { categoria = cat },
-                        label = { Text(cat) },
-                        modifier = Modifier.padding(end = 4.dp)
-                    )
+                listOf("Entradas", "Platos Fuertes", "Bebidas", "Postres").forEach { cat ->
+                    FilterChip(selected = categoria == cat, onClick = { categoria = cat }, label = { Text(cat) }, modifier = Modifier.padding(end = 4.dp))
                 }
             }
 
@@ -196,14 +179,11 @@ fun AddProductScreen(
 
             if (esPromocion) {
                 OutlinedTextField(
-                    value = descuento,
-                    onValueChange = { if (it.all { c -> c.isDigit() }) descuento = it },
-                    label = { Text("% Descuento") },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    value = descuento, 
+                    onValueChange = { if (it.all { c -> c.isDigit() }) descuento = it }, 
+                    label = { Text("% Descuento") }, 
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number), 
                     modifier = Modifier.fillMaxWidth(),
-                    singleLine = true,
-                    minLines = 1,
-                    maxLines = 1,
                     shape = RoundedCornerShape(12.dp),
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = colorResource(R.color.esmeralda),
@@ -212,31 +192,14 @@ fun AddProductScreen(
                 )
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
-
             Button(
-                onClick = {
-                    val product = Product(
-                        id = if (productId == -1) 0 else productId,
-                        nombre = nombre,
-                        precio = precio.toDoubleOrNull() ?: 0.0,
-                        descripcion = descripcion,
-                        imagenUrl = imagenUrl,
-                        categoria = categoria,
-                        descuento = if (esPromocion) (descuento.toDoubleOrNull() ?: 0.0) else 0.0,
-                        esPromocion = esPromocion
-                    )
-                    
-                    if (productId == -1) {
-                        viewModel.addProduct(product)
-                    } else {
-                        viewModel.updateProduct(product)
-                    }
-                    navController.popBackStack()
-                },
                 enabled = nombre.isNotBlank() && precio.isNotBlank(),
-                modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(containerColor = colorResource(R.color.esmeralda))
+                onClick = {
+                    onSave(Product(id = if (productId == -1) 0 else productId, nombre = nombre, precio = precio.toDoubleOrNull() ?: 0.0, descripcion = descripcion, imagenUrl = imagenUrl, categoria = categoria, descuento = if (esPromocion) (descuento.toDoubleOrNull() ?: 0.0) else 0.0, esPromocion = esPromocion))
+                },
+                modifier = Modifier.fillMaxWidth().height(56.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = colorResource(R.color.esmeralda)),
+                shape = RoundedCornerShape(12.dp)
             ) {
                 Text(if (productId == -1) "Guardar Producto" else "Actualizar Producto")
             }

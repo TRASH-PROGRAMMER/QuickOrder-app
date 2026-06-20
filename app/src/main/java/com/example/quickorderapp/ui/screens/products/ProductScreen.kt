@@ -11,18 +11,36 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.quickorderapp.domain.model.Product
 import com.example.quickorderapp.ui.components.ProductCard
 import com.example.quickorderapp.viewmodel.ProductUiState
 import com.example.quickorderapp.viewmodel.ProductViewModel
 
-/**
- * Pantalla que muestra el catálogo de productos.
- */
 @Composable
 fun ProductScreen(viewModel: ProductViewModel = hiltViewModel()) {
-    val uiState by viewModel.uiState.collectAsState()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
+    ProductScreenContent(
+        uiState = uiState,
+        onAddTestProduct = {
+            viewModel.addProduct(
+                Product(
+                    nombre = "Nuevo Producto",
+                    precio = 10.0,
+                    descripcion = "Descripción del nuevo producto",
+                    categoria = "General"
+                )
+            )
+        }
+    )
+}
+
+@Composable
+fun ProductScreenContent(
+    uiState: ProductUiState,
+    onAddTestProduct: () -> Unit
+) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -32,16 +50,16 @@ fun ProductScreen(viewModel: ProductViewModel = hiltViewModel()) {
         Spacer(modifier = Modifier.height(16.dp))
 
         Box(modifier = Modifier.weight(1f)) {
-            when (val state = uiState) {
+            when (uiState) {
                 is ProductUiState.Loading -> {
                     CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                 }
                 is ProductUiState.Success -> {
-                    ProductList(products = state.products)
+                    ProductList(products = uiState.products)
                 }
                 is ProductUiState.Error -> {
                     Text(
-                        text = "Error: ${state.message}",
+                        text = "Error: ${uiState.message}",
                         color = MaterialTheme.colorScheme.error,
                         modifier = Modifier.align(Alignment.Center)
                     )
@@ -50,16 +68,7 @@ fun ProductScreen(viewModel: ProductViewModel = hiltViewModel()) {
         }
 
         Button(
-            onClick = {
-                viewModel.addProduct(
-                    Product(
-                        nombre = "Nuevo Producto",
-                        precio = 10.0,
-                        descripcion = "Descripción del nuevo producto",
-                        categoria = "General"
-                    )
-                )
-            },
+            onClick = onAddTestProduct,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 16.dp)
