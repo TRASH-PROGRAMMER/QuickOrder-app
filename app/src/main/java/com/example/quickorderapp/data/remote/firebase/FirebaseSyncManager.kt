@@ -1,0 +1,58 @@
+package com.example.quickorderapp.data.remote.firebase
+
+import android.content.Context
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
+import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
+import javax.inject.Inject
+import javax.inject.Singleton
+
+@Singleton
+class FirebaseSyncManager @Inject constructor(
+    private val firebaseProductDataSource: FirebaseProductDataSource,
+    @ApplicationContext private val context: Context
+) {
+    private val _isSyncing = MutableStateFlow(false)
+    val isSyncing: StateFlow<Boolean> = _isSyncing
+
+    private val _lastSyncTime = MutableStateFlow(0L)
+    val lastSyncTime: StateFlow<Long> = _lastSyncTime
+
+    /**
+     * Realiza una sincronización completa de la nube a la base de datos local.
+     */
+    fun syncAll() {
+        if (!isNetworkAvailable()) return
+        
+        _isSyncing.value = true
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                // Sincronizar productos de Firestore a Room
+                firebaseProductDataSource.syncAllFromCloud()
+                
+                _lastSyncTime.value = System.currentTimeMillis()
+            } catch (e: Exception) {
+                // Manejar error silencioso
+            } finally {
+                _isSyncing.value = false
+            }
+        }
+    }
+
+    fun hasInternetConnection(): Boolean = isNetworkAvailable()
+
+    private fun isNetworkAvailable(): Boolean {
+        val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) 
+            as ConnectivityManager
+        
+        val network = connectivityManager.activeNetwork
+        val capabilities = connectivityManager.getNetworkCapabilities(network)
+        
+        return capabilities?.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) == true
+    }
+}

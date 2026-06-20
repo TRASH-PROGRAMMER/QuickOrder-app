@@ -24,7 +24,7 @@ object DatabaseModule {
         return Room.databaseBuilder(
             context,
             AppDatabase::class.java,
-            "quick_order_database_v2" // Cambiado para evitar conflictos de esquema
+            "quick_order_database_v3" // Incrementado para asegurar limpieza
         )
         .fallbackToDestructiveMigration()
         .build()

@@ -1,17 +1,20 @@
 package com.example.quickorderapp
 
 import android.app.Application
+import com.example.quickorderapp.data.remote.firebase.FirebaseSyncManager
 import dagger.hilt.android.HiltAndroidApp
+import javax.inject.Inject
 
-/**
-
- * Clase base [Application] para la aplicación de Pedidos Rápidos.
-
- *
- * Esta clase está anotada con [HiltAndroidApp] para activar la generación de código de Hilt,
-
- * que actúa como contenedor de dependencias a nivel de aplicación.
-
- */
 @HiltAndroidApp
-class QuickOrderApplication : Application()
+class QuickOrderApplication : Application() {
+    
+    @Inject
+    lateinit var syncManager: FirebaseSyncManager
+    
+    override fun onCreate() {
+        super.onCreate()
+        // Iniciar sincronización automática al arrancar la app
+        syncManager.syncAll()
+    }
+}
+
