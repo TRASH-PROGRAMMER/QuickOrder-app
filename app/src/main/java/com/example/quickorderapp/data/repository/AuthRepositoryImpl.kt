@@ -39,4 +39,9 @@ class AuthRepositoryImpl @Inject constructor(
     override suspend fun saveSessionRole(role: String) = withContext(Dispatchers.IO) {
         sessionManager.saveRole(role)
     }
+
+    override suspend fun logout() = withContext(Dispatchers.IO) {
+        firebaseAuthDataSource.logout()
+        sessionManager.clearSession()
+    }
 }

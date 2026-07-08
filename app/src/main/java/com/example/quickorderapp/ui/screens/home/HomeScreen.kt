@@ -5,13 +5,14 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -30,17 +31,22 @@ fun HomeScreen(
     productViewModel: ProductViewModel = hiltViewModel(),
     homeViewModel: HomeViewModel = hiltViewModel()
 ) {
-    // 1. collectAsStateWithLifecycle para cumplimiento MAD Skills
     val uiState by productViewModel.uiState.collectAsStateWithLifecycle()
     val userRole by homeViewModel.userRole.collectAsStateWithLifecycle()
 
-    // 2. State Hoisting: Delegamos la UI al componente Stateless
     HomeScreenContent(
         uiState = uiState,
         userRole = userRole,
         onAddProduct = { navController.navigate("AddProductScreen") },
         onEditProduct = { navController.navigate("AddProductScreen?productId=${it.id}") },
-        onDeleteProduct = { productViewModel.deleteProduct(it) }
+        onDeleteProduct = { productViewModel.deleteProduct(it) },
+        onLogout = {
+            homeViewModel.logout {
+                navController.navigate("login") {
+                    popUpTo(0) { inclusive = true }
+                }
+            }
+        }
     )
 }
 
@@ -52,7 +58,8 @@ fun HomeScreenContent(
     userRole: String,
     onAddProduct: () -> Unit,
     onEditProduct: (Product) -> Unit,
-    onDeleteProduct: (Product) -> Unit
+    onDeleteProduct: (Product) -> Unit,
+    onLogout: () -> Unit
 ) {
     var selectedCategory by remember { mutableStateOf("Entradas") }
     val categories = listOf("Entradas", "Platos Fuertes", "Promociones", "Bebidas", "Postres")
@@ -66,6 +73,15 @@ fun HomeScreenContent(
                         fontWeight = FontWeight.Bold,
                         style = MaterialTheme.typography.headlineSmall
                     ) 
+                },
+                actions = {
+                    IconButton(onClick = onLogout) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.Logout,
+                            contentDescription = "Cerrar Sesión",
+                            tint = MaterialTheme.colorScheme.error
+                        )
+                    }
                 }
             )
         },

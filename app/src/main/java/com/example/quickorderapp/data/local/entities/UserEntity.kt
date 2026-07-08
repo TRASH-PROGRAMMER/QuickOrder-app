@@ -12,6 +12,6 @@ data class UserEntity(
     val id: Int = 0,
     val nombre: String,
     val correo: String,
-    val rol: String, // "MESERO", "ADMIN"
+    val rol: String, // "COMENSAL", "MESERO", "ADMIN"
     val password: String // En una app real, esto sería un token o hash
 )

@@ -7,6 +7,6 @@ data class User(
     val id: Int = 0,
     val nombre: String,
     val correo: String,
-    val rol: String, // "MESERO", "ADMIN"
+    val rol: String, // "COMENSAL", "MESERO", "ADMIN"
     val password: String
 )

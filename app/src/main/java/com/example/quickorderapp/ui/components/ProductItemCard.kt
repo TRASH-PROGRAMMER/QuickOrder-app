@@ -1,6 +1,5 @@
 package com.example.quickorderapp.ui.components
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -8,14 +7,15 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.outlined.Restaurant
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.colorResource
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -34,6 +34,8 @@ fun ProductCard(
     onDelete: (Product) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
+    val placeholderPainter = rememberVectorPainter(Icons.Outlined.Restaurant)
+
     Card(
         modifier = modifier
             .fillMaxWidth()
@@ -46,7 +48,7 @@ fun ProductCard(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(120.dp)
-                    .background(Color.LightGray)
+                    .background(Color.LightGray.copy(alpha = 0.5f))
             ) {
                 if (product.imagenUrl.isNotBlank()) {
                     AsyncImage(
@@ -54,16 +56,21 @@ fun ProductCard(
                         contentDescription = product.nombre,
                         modifier = Modifier.fillMaxSize(),
                         contentScale = ContentScale.Crop,
-                        placeholder = painterResource(id = R.drawable.ic_launcher_background),
-                        error = painterResource(id = R.drawable.ic_launcher_background)
+                        placeholder = placeholderPainter,
+                        error = placeholderPainter
                     )
                 } else {
-                    Image(
-                        painter = painterResource(id = R.drawable.ic_launcher_background),
-                        contentDescription = "Sin imagen",
+                    Box(
                         modifier = Modifier.fillMaxSize(),
-                        contentScale = ContentScale.Crop
-                    )
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Outlined.Restaurant,
+                            contentDescription = "Sin imagen",
+                            modifier = Modifier.size(48.dp),
+                            tint = Color.Gray
+                        )
+                    }
                 }
 
                 if (product.descuento > 0) {

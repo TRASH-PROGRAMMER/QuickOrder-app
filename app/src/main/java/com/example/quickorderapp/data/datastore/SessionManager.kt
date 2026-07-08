@@ -27,4 +27,10 @@ class SessionManager @Inject constructor(
             prefs[USER_ROLE] = role
         }
     }
+
+    suspend fun clearSession() {
+        context.sessionDataStore.edit { prefs ->
+            prefs.clear()
+        }
+    }
 }

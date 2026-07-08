@@ -6,4 +6,5 @@ interface AuthRepository {
     suspend fun registerUser(user: User): Long
     suspend fun getUserByEmail(email: String): User?
     suspend fun saveSessionRole(role: String)
+    suspend fun logout()
 }
