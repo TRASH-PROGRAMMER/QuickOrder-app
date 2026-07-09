@@ -5,7 +5,10 @@ import com.example.quickorderapp.data.datastore.SessionManager
 import com.example.quickorderapp.data.remote.firebase.FirebaseAuthDataSource
 import com.example.quickorderapp.domain.model.User
 import com.example.quickorderapp.domain.repository.AuthRepository
+import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -14,32 +17,28 @@ import javax.inject.Singleton
 class AuthRepositoryImpl @Inject constructor(
     private val userDao: UserDao,
     private val sessionManager: SessionManager,
-    private val firebaseAuthDataSource: FirebaseAuthDataSource
+    private val firebaseAuthDataSource: FirebaseAuthDataSource,
+    private val firebaseAuth: FirebaseAuth
 ) : AuthRepository {
 
     override suspend fun registerUser(user: User): Long = withContext(Dispatchers.IO) {
         userDao.insert(user.toEntity())
-        try {
-            firebaseAuthDataSource.registerUser(user)
-        } catch (e: Exception) { }
+        firebaseAuthDataSource.registerUser(user)
         1L
     }
 
     override suspend fun login(email: String, password: String): User? = withContext(Dispatchers.IO) {
-        // 1. Intentar login real con Firebase
         val cloudUser = firebaseAuthDataSource.login(email, password)
         
         if (cloudUser != null) {
-            // Sincronizar con Room local: Guardamos el perfil bajado de la nube
-            // Nota: El password no se baja de Firebase por seguridad, pero lo guardamos en Room 
-            // para permitir login offline posterior.
             userDao.insert(cloudUser.copy(password = password).toEntity())
+            saveSession(cloudUser)
             return@withContext cloudUser
         }
 
-        // 2. Fallback Offline: Validar contra Room local
         val localUser = userDao.getUserByEmail(email)?.toDomain()
         if (localUser != null && localUser.password == password) {
+            saveSession(localUser)
             return@withContext localUser
         }
         
@@ -50,12 +49,28 @@ class AuthRepositoryImpl @Inject constructor(
         userDao.getUserByEmail(email)?.toDomain()
     }
 
-    override suspend fun saveSessionRole(role: String) = withContext(Dispatchers.IO) {
-        sessionManager.saveRole(role)
+    override suspend fun saveSession(user: User) = withContext(Dispatchers.IO) {
+        sessionManager.saveSession(user.nombre, user.correo, user.rol)
     }
+
+    override fun getUserRole(): Flow<String> = sessionManager.userRole
+    override fun getUserName(): Flow<String> = sessionManager.userName
+    override fun getUserEmail(): Flow<String> = sessionManager.userEmail
 
     override suspend fun logout() = withContext(Dispatchers.IO) {
         firebaseAuthDataSource.logout()
         sessionManager.clearSession()
+    }
+
+    override suspend fun changePassword(newPassword: String): Boolean = withContext(Dispatchers.IO) {
+        try {
+            val user = firebaseAuth.currentUser
+            user?.updatePassword(newPassword)?.await()
+            // También deberíamos actualizarlo localmente si quisiéramos mantener paridad offline
+            // pero Firebase Auth es la fuente primaria para el password real.
+            true
+        } catch (e: Exception) {
+            false
+        }
     }
 }

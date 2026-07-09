@@ -17,13 +17,25 @@ class SessionManager @Inject constructor(
     @ApplicationContext private val context: Context
 ) {
     private val USER_ROLE = stringPreferencesKey("user_role")
+    private val USER_NAME = stringPreferencesKey("user_name")
+    private val USER_EMAIL = stringPreferencesKey("user_email")
 
     val userRole: Flow<String> = context.sessionDataStore.data.map { prefs ->
-        prefs[USER_ROLE] ?: "MESERO" // Por defecto Mesero
+        prefs[USER_ROLE] ?: "COMENSAL"
     }
 
-    suspend fun saveRole(role: String) {
+    val userName: Flow<String> = context.sessionDataStore.data.map { prefs ->
+        prefs[USER_NAME] ?: "Usuario QuickOrder"
+    }
+
+    val userEmail: Flow<String> = context.sessionDataStore.data.map { prefs ->
+        prefs[USER_EMAIL] ?: ""
+    }
+
+    suspend fun saveSession(name: String, email: String, role: String) {
         context.sessionDataStore.edit { prefs ->
+            prefs[USER_NAME] = name
+            prefs[USER_EMAIL] = email
             prefs[USER_ROLE] = role
         }
     }

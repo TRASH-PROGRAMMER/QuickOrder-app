@@ -6,6 +6,7 @@ import com.example.quickorderapp.domain.model.Product
 fun ProductEntity.toDomain(): Product {
     return Product(
         id = id,
+        uid = uid,
         nombre = nombre,
         descripcion = descripcion,
         precio = precio,
@@ -20,6 +21,7 @@ fun ProductEntity.toDomain(): Product {
 fun Product.toEntity(): ProductEntity {
     return ProductEntity(
         id = id,
+        uid = uid,
         nombre = nombre,
         descripcion = descripcion,
         precio = precio,

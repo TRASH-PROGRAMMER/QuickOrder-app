@@ -1,5 +1,6 @@
 package com.example.quickorderapp.data.remote.firebase
 
+import android.util.Log
 import com.example.quickorderapp.data.local.dao.MesaDao
 import com.example.quickorderapp.data.repository.toEntity
 import com.example.quickorderapp.domain.model.Mesa
@@ -15,6 +16,7 @@ class FirebaseMesaDataSource @Inject constructor(
     private val mesaDao: MesaDao
 ) {
     companion object {
+        private const val TAG = "FirebaseMesaDS"
         private const val COLLECTION_MESAS = "mesas"
     }
 
@@ -30,7 +32,9 @@ class FirebaseMesaDataSource @Inject constructor(
                 .document(mesa.numero.toString())
                 .set(mesaMap, SetOptions.merge())
                 .await()
-        } catch (e: Exception) { }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error adding mesa to Firebase: ${e.message}", e)
+        }
     }
 
     suspend fun deleteMesa(mesa: Mesa) {
@@ -39,7 +43,9 @@ class FirebaseMesaDataSource @Inject constructor(
                 .document(mesa.numero.toString())
                 .delete()
                 .await()
-        } catch (e: Exception) { }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error deleting mesa from Firebase: ${e.message}", e)
+        }
     }
 
     suspend fun syncAllFromCloud() {
@@ -56,6 +62,8 @@ class FirebaseMesaDataSource @Inject constructor(
             if (mesasFromCloud.isNotEmpty()) {
                 mesaDao.insertAll(mesasFromCloud.map { it.toEntity() })
             }
-        } catch (e: Exception) { }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error syncing mesas from Cloud: ${e.message}", e)
+        }
     }
 }

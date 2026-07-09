@@ -1,10 +1,13 @@
 package com.example.quickorderapp.domain.model
 
+import java.util.UUID
+
 /**
  * Modelo de dominio para un Producto.
  */
 data class Product(
     val id: Int = 0,
+    val uid: String = UUID.randomUUID().toString(),
     val nombre: String,
     val descripcion: String,
     val precio: Double,

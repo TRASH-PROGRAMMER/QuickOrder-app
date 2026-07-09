@@ -1,5 +1,6 @@
 package com.example.quickorderapp.data.remote.firebase
 
+import android.util.Log
 import com.example.quickorderapp.data.local.dao.ProductDao
 import com.example.quickorderapp.data.local.entities.ProductEntity
 import com.example.quickorderapp.data.repository.toEntity
@@ -16,12 +17,14 @@ class FirebaseProductDataSource @Inject constructor(
     private val productDao: ProductDao
 ) {
     companion object {
+        private const val TAG = "FirebaseProductDS"
         private const val COLLECTION_PRODUCTS = "productos"
     }
 
     suspend fun addProduct(product: Product): Long {
         return try {
             val productMap = hashMapOf(
+                "uid" to product.uid,
                 "nombre" to product.nombre,
                 "descripcion" to product.descripcion,
                 "precio" to product.precio,
@@ -31,12 +34,14 @@ class FirebaseProductDataSource @Inject constructor(
                 "esPromocion" to product.esPromocion,
                 "ultimoCambio" to product.ultimoCambio
             )
+            // Usamos UID como identificador único en Firestore
             firestore.collection(COLLECTION_PRODUCTS)
-                .document(product.nombre)
+                .document(product.uid)
                 .set(productMap, SetOptions.merge())
                 .await()
             1L
         } catch (e: Exception) {
+            Log.e(TAG, "Error adding product to Firebase: ${e.message}", e)
             0L
         }
     }
@@ -48,14 +53,17 @@ class FirebaseProductDataSource @Inject constructor(
     suspend fun deleteProduct(product: Product) {
         try {
             firestore.collection(COLLECTION_PRODUCTS)
-                .document(product.nombre)
+                .document(product.uid)
                 .delete()
                 .await()
-        } catch (e: Exception) { }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error deleting product from Firebase: ${e.message}", e)
+        }
     }
 
     /**
      * Sincroniza datos de la nube a la base de datos local respetando los cambios más recientes.
+     * Utiliza el UID como clave de sincronización.
      */
     suspend fun syncAllFromCloud() {
         try {
@@ -63,15 +71,16 @@ class FirebaseProductDataSource @Inject constructor(
             val entitiesToUpdate = mutableListOf<ProductEntity>()
             
             for (doc in snapshot.documents) {
-                val nombre = doc.getString("nombre") ?: continue
+                val uid = doc.getString("uid") ?: continue
                 val cloudUltimoCambio = doc.getLong("ultimoCambio") ?: 0L
-                val localProduct = productDao.getByNombre(nombre)
+                val localProduct = productDao.getByUid(uid)
                 
-                // Estrategia: Solo actualizar si la nube es estrictamente más reciente
+                // Estrategia: Solo actualizar si la nube es estrictamente más reciente o no existe localmente
                 if (localProduct == null || cloudUltimoCambio > localProduct.ultimoCambio) {
                     val product = Product(
                         id = localProduct?.id ?: 0,
-                        nombre = nombre,
+                        uid = uid,
+                        nombre = doc.getString("nombre") ?: "",
                         descripcion = doc.getString("descripcion") ?: "",
                         precio = doc.getDouble("precio") ?: 0.0,
                         imagenUrl = doc.getString("imagenUrl") ?: "",
@@ -87,6 +96,8 @@ class FirebaseProductDataSource @Inject constructor(
             if (entitiesToUpdate.isNotEmpty()) {
                 productDao.insertAll(entitiesToUpdate)
             }
-        } catch (e: Exception) { }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error syncing products from Cloud: ${e.message}", e)
+        }
     }
 }

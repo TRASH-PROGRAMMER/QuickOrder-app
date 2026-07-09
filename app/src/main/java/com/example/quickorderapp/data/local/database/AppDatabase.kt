@@ -18,7 +18,7 @@ import com.example.quickorderapp.data.local.entities.*
         PromocionEntity::class,
         VentaEntity::class
     ],
-    version = 3, // Incrementado por campo ultimoCambio y resolución de conflictos
+    version = 5, // Incrementado por campo UID e índices únicos en productos
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {

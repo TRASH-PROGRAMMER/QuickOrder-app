@@ -1,35 +1,29 @@
 package com.example.quickorderapp.data.local.dao
-import androidx.room.Dao
-import androidx.room.Insert
-import androidx.room.OnConflictStrategy
-import androidx.room.Query
-import androidx.room.Update
-import androidx.room.Delete
-import kotlinx.coroutines.flow.Flow
+
+import androidx.room.*
 import com.example.quickorderapp.data.local.entities.ProductEntity
+import kotlinx.coroutines.flow.Flow
 
-
-
-/*
- * Objeto de acceso a datos (DAO) para gestionar las entradas de [ProductEntity] en la base de datos local.
- * Proporciona métodos para realizar operaciones CRUD en la tabla de productos.
+/**
+ * DAO para la gestión de productos en Room.
  */
 @Dao
 interface ProductDao {
     @Query("SELECT * FROM productos")
-     fun getAll(): Flow<List<ProductEntity>>
-     @Insert(onConflict = OnConflictStrategy.REPLACE)
-     suspend fun insert(product: ProductEntity)
+    fun getAll(): Flow<List<ProductEntity>>
 
-     @Insert(onConflict = OnConflictStrategy.REPLACE)
-     suspend fun insertAll(products: List<ProductEntity>)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insert(product: ProductEntity)
 
-     @Query("SELECT * FROM productos WHERE nombre = :nombre LIMIT 1")
-     suspend fun getByNombre(nombre: String): ProductEntity?
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertAll(products: List<ProductEntity>)
 
-     @Update
-     suspend fun update(product: ProductEntity)
+    @Query("SELECT * FROM productos WHERE uid = :uid LIMIT 1")
+    suspend fun getByUid(uid: String): ProductEntity?
 
-     @Delete
-     suspend fun delete(product: ProductEntity)
+    @Update
+    suspend fun update(product: ProductEntity)
+
+    @Delete
+    suspend fun delete(product: ProductEntity)
 }

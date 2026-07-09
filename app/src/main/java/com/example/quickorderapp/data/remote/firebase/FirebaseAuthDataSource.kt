@@ -1,5 +1,6 @@
 package com.example.quickorderapp.data.remote.firebase
 
+import android.util.Log
 import com.example.quickorderapp.domain.model.User
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -16,6 +17,7 @@ class FirebaseAuthDataSource @Inject constructor(
     private val firestore: FirebaseFirestore
 ) {
     companion object {
+        private const val TAG = "FirebaseAuthDS"
         private const val COLLECTION_USERS = "usuarios"
     }
 
@@ -25,6 +27,7 @@ class FirebaseAuthDataSource @Inject constructor(
             val uid = firebaseAuth.currentUser?.uid ?: return null
             getUserFromFirestore(uid)
         } catch (e: Exception) {
+            Log.e(TAG, "Error during Firebase login: ${e.message}", e)
             null
         }
     }
@@ -50,6 +53,7 @@ class FirebaseAuthDataSource @Inject constructor(
             }
             1L
         } catch (e: Exception) {
+            Log.e(TAG, "Error during Firebase registration: ${e.message}", e)
             0L
         }
     }
@@ -71,6 +75,7 @@ class FirebaseAuthDataSource @Inject constructor(
                 )
             } else null
         } catch (e: Exception) {
+            Log.e(TAG, "Error fetching user from Firestore: ${e.message}", e)
             null
         }
     }

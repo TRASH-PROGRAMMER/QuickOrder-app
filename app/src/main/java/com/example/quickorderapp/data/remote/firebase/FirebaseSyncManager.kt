@@ -3,6 +3,7 @@ package com.example.quickorderapp.data.remote.firebase
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
+import android.util.Log
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -18,6 +19,10 @@ class FirebaseSyncManager @Inject constructor(
     private val firebaseMesaDataSource: FirebaseMesaDataSource,
     @ApplicationContext private val context: Context
 ) {
+    companion object {
+        private const val TAG = "FirebaseSyncManager"
+    }
+
     private val _isSyncing = MutableStateFlow(false)
     val isSyncing: StateFlow<Boolean> = _isSyncing
 
@@ -41,7 +46,7 @@ class FirebaseSyncManager @Inject constructor(
                 
                 _lastSyncTime.value = System.currentTimeMillis()
             } catch (e: Exception) {
-                // Manejar error silencioso
+                Log.e(TAG, "General sync failed: ${e.message}", e)
             } finally {
                 _isSyncing.value = false
             }

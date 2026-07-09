@@ -9,6 +9,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
@@ -25,17 +26,14 @@ fun MainScreen(
     rootNavController: NavController,
     homeViewModel: HomeViewModel = hiltViewModel()
 ) {
-    val userRole by homeViewModel.userRole.collectAsState()
+    val userRole by homeViewModel.userRole.collectAsStateWithLifecycle()
 
-    if (userRole == "ADMIN") {
-        HomeScreen(rootNavController)
-    } else {
-        ClientMainScreen(rootNavController)
-    }
+    // Todos los usuarios usan ahora el ClientMainScreen para tener acceso al Perfil y Navegación
+    ClientMainScreen(rootNavController, userRole)
 }
 
 @Composable
-fun ClientMainScreen(rootNavController: NavController) {
+fun ClientMainScreen(rootNavController: NavController, role: String) {
     val navController = rememberNavController()
     val items = listOf(
         Screen.Inicio,

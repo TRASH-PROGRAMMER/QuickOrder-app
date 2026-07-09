@@ -34,6 +34,7 @@ import com.example.quickorderapp.domain.model.Product
 import com.example.quickorderapp.viewmodel.ProductUiState
 import com.example.quickorderapp.viewmodel.ProductViewModel
 import com.example.quickorderapp.viewmodel.SaveStatus
+import java.util.UUID
 
 @Composable
 fun AddProductScreen(
@@ -79,6 +80,7 @@ fun AddProductScreenContent(
     var categoria by remember { mutableStateOf("Entradas") }
     var descuento by remember { mutableStateOf("0") }
     var esPromocion by remember { mutableStateOf(false) }
+    var productUid by remember { mutableStateOf(UUID.randomUUID().toString()) }
 
     val photoPickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia(),
@@ -95,6 +97,7 @@ fun AddProductScreenContent(
                 categoria = it.categoria
                 descuento = it.descuento.toString()
                 esPromocion = it.esPromocion
+                productUid = it.uid
             }
         }
     }
@@ -208,6 +211,7 @@ fun AddProductScreenContent(
                 onClick = {
                     onSaveProduct(Product(
                         id = if (productId == -1) 0 else productId, 
+                        uid = productUid,
                         nombre = nombre, 
                         precio = precio.toDoubleOrNull() ?: 0.0, 
                         descripcion = descripcion, 
