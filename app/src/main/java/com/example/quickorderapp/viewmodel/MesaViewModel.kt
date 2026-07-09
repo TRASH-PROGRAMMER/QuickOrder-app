@@ -3,9 +3,7 @@ package com.example.quickorderapp.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.quickorderapp.domain.model.Mesa
-import com.example.quickorderapp.domain.usecase.AddMesaUseCase
-import com.example.quickorderapp.domain.usecase.DeleteMesaUseCase
-import com.example.quickorderapp.domain.usecase.GetMesasUseCase
+import com.example.quickorderapp.domain.usecase.*
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -21,6 +19,7 @@ sealed interface MesaUiState {
 class MesaViewModel @Inject constructor(
     private val getMesasUseCase: GetMesasUseCase,
     private val addMesaUseCase: AddMesaUseCase,
+    private val updateMesaUseCase: UpdateMesaUseCase,
     private val deleteMesaUseCase: DeleteMesaUseCase
 ) : ViewModel() {
 
@@ -41,6 +40,16 @@ class MesaViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 addMesaUseCase(mesa)
+            } catch (e: Exception) {
+                // Manejar error
+            }
+        }
+    }
+
+    fun updateMesa(mesa: Mesa) {
+        viewModelScope.launch {
+            try {
+                updateMesaUseCase(mesa)
             } catch (e: Exception) {
                 // Manejar error
             }

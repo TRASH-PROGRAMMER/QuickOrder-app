@@ -7,6 +7,7 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Logout
+import androidx.compose.material.icons.filled.TableBar
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -40,6 +41,7 @@ fun HomeScreen(
         onAddProduct = { navController.navigate("AddProductScreen") },
         onEditProduct = { navController.navigate("AddProductScreen?productId=${it.id}") },
         onDeleteProduct = { productViewModel.deleteProduct(it) },
+        onManageTables = { navController.navigate("MesaScreen") },
         onLogout = {
             homeViewModel.logout {
                 navController.navigate("login") {
@@ -59,6 +61,7 @@ fun HomeScreenContent(
     onAddProduct: () -> Unit,
     onEditProduct: (Product) -> Unit,
     onDeleteProduct: (Product) -> Unit,
+    onManageTables: () -> Unit,
     onLogout: () -> Unit
 ) {
     var selectedCategory by remember { mutableStateOf("Entradas") }
@@ -75,6 +78,15 @@ fun HomeScreenContent(
                     ) 
                 },
                 actions = {
+                    if (userRole == "ADMIN") {
+                        IconButton(onClick = onManageTables) {
+                            Icon(
+                                imageVector = Icons.Default.TableBar,
+                                contentDescription = "Gestionar Mesas",
+                                tint = colorResource(R.color.esmeralda)
+                            )
+                        }
+                    }
                     IconButton(onClick = onLogout) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.Logout,
