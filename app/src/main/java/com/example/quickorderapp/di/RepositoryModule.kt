@@ -1,8 +1,10 @@
 package com.example.quickorderapp.di
 
 import com.example.quickorderapp.data.repository.AuthRepositoryImpl
+import com.example.quickorderapp.data.repository.MesaRepositoryImpl
 import com.example.quickorderapp.data.repository.ProductRepositoryImpl
 import com.example.quickorderapp.domain.repository.AuthRepository
+import com.example.quickorderapp.domain.repository.MesaRepository
 import com.example.quickorderapp.domain.repository.ProductRepository
 import dagger.Binds
 import dagger.Module
@@ -28,4 +30,10 @@ abstract class RepositoryModule {
     abstract fun bindAuthRepository(
         authRepositoryImpl: AuthRepositoryImpl
     ): AuthRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindMesaRepository(
+        mesaRepositoryImpl: MesaRepositoryImpl
+    ): MesaRepository
 }

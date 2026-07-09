@@ -26,7 +26,7 @@ object DatabaseModule {
         return Room.databaseBuilder(
             context,
             AppDatabase::class.java,
-            "quick_order_database_v4" // Incrementado para asegurar la creación con los nuevos usuarios
+            "quick_order_database_v5" // Incrementado para asegurar la limpieza tras corregir duplicados
         )
         .addCallback(object : RoomDatabase.Callback() {
             override fun onCreate(db: SupportSQLiteDatabase) {

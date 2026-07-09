@@ -15,6 +15,7 @@ import javax.inject.Singleton
 @Singleton
 class FirebaseSyncManager @Inject constructor(
     private val firebaseProductDataSource: FirebaseProductDataSource,
+    private val firebaseMesaDataSource: FirebaseMesaDataSource,
     @ApplicationContext private val context: Context
 ) {
     private val _isSyncing = MutableStateFlow(false)
@@ -34,6 +35,9 @@ class FirebaseSyncManager @Inject constructor(
             try {
                 // Sincronizar productos de Firestore a Room
                 firebaseProductDataSource.syncAllFromCloud()
+                
+                // Sincronizar mesas de Firestore a Room
+                firebaseMesaDataSource.syncAllFromCloud()
                 
                 _lastSyncTime.value = System.currentTimeMillis()
             } catch (e: Exception) {

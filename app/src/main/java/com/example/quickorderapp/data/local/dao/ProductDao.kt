@@ -24,6 +24,9 @@ interface ProductDao {
      @Insert(onConflict = OnConflictStrategy.REPLACE)
      suspend fun insertAll(products: List<ProductEntity>)
 
+     @Query("SELECT * FROM productos WHERE nombre = :nombre LIMIT 1")
+     suspend fun getByNombre(nombre: String): ProductEntity?
+
      @Update
      suspend fun update(product: ProductEntity)
 

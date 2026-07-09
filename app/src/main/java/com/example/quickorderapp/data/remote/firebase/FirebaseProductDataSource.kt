@@ -1,6 +1,7 @@
 package com.example.quickorderapp.data.remote.firebase
 
 import com.example.quickorderapp.data.local.dao.ProductDao
+import com.example.quickorderapp.data.local.entities.ProductEntity
 import com.example.quickorderapp.data.repository.toEntity
 import com.example.quickorderapp.domain.model.Product
 import com.google.firebase.firestore.FirebaseFirestore
@@ -56,10 +57,12 @@ class FirebaseProductDataSource @Inject constructor(
     suspend fun syncAllFromCloud() {
         try {
             val snapshot = firestore.collection(COLLECTION_PRODUCTS).get().await()
-            val productsFromCloud = snapshot.documents.mapNotNull { doc ->
-                Product(
-                    id = doc.id.hashCode(),
-                    nombre = doc.getString("nombre") ?: "",
+            val entities = mutableListOf<ProductEntity>()
+            for (doc in snapshot.documents) {
+                val nombre = doc.getString("nombre") ?: continue
+                val product = Product(
+                    id = productDao.getByNombre(nombre)?.id ?: 0, // reusa el id local si ya existe
+                    nombre = nombre,
                     descripcion = doc.getString("descripcion") ?: "",
                     precio = doc.getDouble("precio") ?: 0.0,
                     imagenUrl = doc.getString("imagenUrl") ?: "",
@@ -67,11 +70,9 @@ class FirebaseProductDataSource @Inject constructor(
                     descuento = doc.getDouble("descuento") ?: 0.0,
                     esPromocion = doc.getBoolean("esPromocion") ?: false
                 )
+                entities.add(product.toEntity())
             }
-            // Actualizar Room con los datos de la nube
-            if (productsFromCloud.isNotEmpty()) {
-                productDao.insertAll(productsFromCloud.map { it.toEntity() })
-            }
+            if (entities.isNotEmpty()) productDao.insertAll(entities)
         } catch (e: Exception) { }
     }
 }

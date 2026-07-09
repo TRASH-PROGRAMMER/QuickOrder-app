@@ -12,6 +12,9 @@ interface MesaDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(mesa: MesaEntity)
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertAll(mesas: List<MesaEntity>)
+
     @Update
     suspend fun update(mesa: MesaEntity)
 
