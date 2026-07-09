@@ -18,6 +18,13 @@ sealed interface ProductUiState {
     data class Error(val message: String) : ProductUiState
 }
 
+sealed interface SaveStatus {
+    data object Idle : SaveStatus
+    data object Saving : SaveStatus
+    data object Success : SaveStatus
+    data class Error(val message: String) : SaveStatus
+}
+
 @HiltViewModel
 class ProductViewModel @Inject constructor(
     private val getProductsUseCase: GetProductsUseCase,
@@ -31,7 +38,6 @@ class ProductViewModel @Inject constructor(
             ProductUiState.Success(products) 
         }
         .catch { e -> 
-            e.printStackTrace()
             emit(ProductUiState.Error("Fallo en BD: ${e.localizedMessage}")) 
         }
         .stateIn(
@@ -40,22 +46,29 @@ class ProductViewModel @Inject constructor(
             initialValue = ProductUiState.Loading
         )
 
+    private val _saveStatus = MutableStateFlow<SaveStatus>(SaveStatus.Idle)
+    val saveStatus: StateFlow<SaveStatus> = _saveStatus
+
     fun addProduct(product: Product) {
         viewModelScope.launch {
+            _saveStatus.value = SaveStatus.Saving
             try {
                 addProductUseCase(product)
+                _saveStatus.value = SaveStatus.Success
             } catch (e: Exception) {
-                // Error al insertar
+                _saveStatus.value = SaveStatus.Error(e.localizedMessage ?: "Error al guardar")
             }
         }
     }
 
     fun updateProduct(product: Product) {
         viewModelScope.launch {
+            _saveStatus.value = SaveStatus.Saving
             try {
                 updateProductUseCase(product)
+                _saveStatus.value = SaveStatus.Success
             } catch (e: Exception) {
-                // Error al actualizar
+                _saveStatus.value = SaveStatus.Error(e.localizedMessage ?: "Error al actualizar")
             }
         }
     }
@@ -68,5 +81,9 @@ class ProductViewModel @Inject constructor(
                 // Error al eliminar
             }
         }
+    }
+
+    fun resetSaveStatus() {
+        _saveStatus.value = SaveStatus.Idle
     }
 }

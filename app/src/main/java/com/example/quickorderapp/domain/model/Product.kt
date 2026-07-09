@@ -11,5 +11,6 @@ data class Product(
     val imagenUrl: String = "",
     val categoria: String = "",
     val descuento: Double = 0.0,
-    val esPromocion: Boolean = false
+    val esPromocion: Boolean = false,
+    val ultimoCambio: Long = System.currentTimeMillis()
 )

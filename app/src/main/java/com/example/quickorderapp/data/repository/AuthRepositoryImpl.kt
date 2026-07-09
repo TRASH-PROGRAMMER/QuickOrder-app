@@ -18,21 +18,35 @@ class AuthRepositoryImpl @Inject constructor(
 ) : AuthRepository {
 
     override suspend fun registerUser(user: User): Long = withContext(Dispatchers.IO) {
-        // Guardar localmente primero (offline-first)
         userDao.insert(user.toEntity())
-        
-        // Intentar sincronizar con Firebase si hay conexión
         try {
             firebaseAuthDataSource.registerUser(user)
-        } catch (e: Exception) {
-            // Silenciar error - los datos están en Room
-        }
-        
+        } catch (e: Exception) { }
         1L
     }
 
+    override suspend fun login(email: String, password: String): User? = withContext(Dispatchers.IO) {
+        // 1. Intentar login real con Firebase
+        val cloudUser = firebaseAuthDataSource.login(email, password)
+        
+        if (cloudUser != null) {
+            // Sincronizar con Room local: Guardamos el perfil bajado de la nube
+            // Nota: El password no se baja de Firebase por seguridad, pero lo guardamos en Room 
+            // para permitir login offline posterior.
+            userDao.insert(cloudUser.copy(password = password).toEntity())
+            return@withContext cloudUser
+        }
+
+        // 2. Fallback Offline: Validar contra Room local
+        val localUser = userDao.getUserByEmail(email)?.toDomain()
+        if (localUser != null && localUser.password == password) {
+            return@withContext localUser
+        }
+        
+        null
+    }
+
     override suspend fun getUserByEmail(email: String): User? = withContext(Dispatchers.IO) {
-        // Fallback a Room local
         userDao.getUserByEmail(email)?.toDomain()
     }
 

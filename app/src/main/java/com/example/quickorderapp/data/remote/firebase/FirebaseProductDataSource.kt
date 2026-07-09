@@ -29,10 +29,10 @@ class FirebaseProductDataSource @Inject constructor(
                 "categoria" to product.categoria,
                 "descuento" to product.descuento,
                 "esPromocion" to product.esPromocion,
-                "timestamp" to System.currentTimeMillis()
+                "ultimoCambio" to product.ultimoCambio
             )
             firestore.collection(COLLECTION_PRODUCTS)
-                .document(product.nombre) // Usar nombre como ID para simplificar sync
+                .document(product.nombre)
                 .set(productMap, SetOptions.merge())
                 .await()
             1L
@@ -42,7 +42,7 @@ class FirebaseProductDataSource @Inject constructor(
     }
 
     suspend fun updateProduct(product: Product) {
-        addProduct(product) // Firestore .set(merge=true) hace lo mismo
+        addProduct(product)
     }
 
     suspend fun deleteProduct(product: Product) {
@@ -54,25 +54,39 @@ class FirebaseProductDataSource @Inject constructor(
         } catch (e: Exception) { }
     }
 
+    /**
+     * Sincroniza datos de la nube a la base de datos local respetando los cambios más recientes.
+     */
     suspend fun syncAllFromCloud() {
         try {
             val snapshot = firestore.collection(COLLECTION_PRODUCTS).get().await()
-            val entities = mutableListOf<ProductEntity>()
+            val entitiesToUpdate = mutableListOf<ProductEntity>()
+            
             for (doc in snapshot.documents) {
                 val nombre = doc.getString("nombre") ?: continue
-                val product = Product(
-                    id = productDao.getByNombre(nombre)?.id ?: 0, // reusa el id local si ya existe
-                    nombre = nombre,
-                    descripcion = doc.getString("descripcion") ?: "",
-                    precio = doc.getDouble("precio") ?: 0.0,
-                    imagenUrl = doc.getString("imagenUrl") ?: "",
-                    categoria = doc.getString("categoria") ?: "",
-                    descuento = doc.getDouble("descuento") ?: 0.0,
-                    esPromocion = doc.getBoolean("esPromocion") ?: false
-                )
-                entities.add(product.toEntity())
+                val cloudUltimoCambio = doc.getLong("ultimoCambio") ?: 0L
+                val localProduct = productDao.getByNombre(nombre)
+                
+                // Estrategia: Solo actualizar si la nube es estrictamente más reciente
+                if (localProduct == null || cloudUltimoCambio > localProduct.ultimoCambio) {
+                    val product = Product(
+                        id = localProduct?.id ?: 0,
+                        nombre = nombre,
+                        descripcion = doc.getString("descripcion") ?: "",
+                        precio = doc.getDouble("precio") ?: 0.0,
+                        imagenUrl = doc.getString("imagenUrl") ?: "",
+                        categoria = doc.getString("categoria") ?: "",
+                        descuento = doc.getDouble("descuento") ?: 0.0,
+                        esPromocion = doc.getBoolean("esPromocion") ?: false,
+                        ultimoCambio = cloudUltimoCambio
+                    )
+                    entitiesToUpdate.add(product.toEntity())
+                }
             }
-            if (entities.isNotEmpty()) productDao.insertAll(entities)
+            
+            if (entitiesToUpdate.isNotEmpty()) {
+                productDao.insertAll(entitiesToUpdate)
+            }
         } catch (e: Exception) { }
     }
 }

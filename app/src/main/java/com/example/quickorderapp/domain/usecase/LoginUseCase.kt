@@ -8,12 +8,13 @@ class LoginUseCase @Inject constructor(
     private val repository: AuthRepository
 ) {
     suspend operator fun invoke(email: String, password: String): User? {
-        val user = repository.getUserByEmail(email)
-        return if (user != null && user.password == password) {
+        // Delegamos la autenticación al repositorio (que maneja Firebase + Room)
+        val user = repository.login(email, password)
+        
+        if (user != null) {
             repository.saveSessionRole(user.rol)
-            user
-        } else {
-            null
         }
+        
+        return user
     }
 }

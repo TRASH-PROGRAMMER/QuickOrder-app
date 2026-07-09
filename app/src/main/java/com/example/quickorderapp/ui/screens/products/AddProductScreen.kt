@@ -23,7 +23,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.colorResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -34,6 +33,7 @@ import com.example.quickorderapp.R
 import com.example.quickorderapp.domain.model.Product
 import com.example.quickorderapp.viewmodel.ProductUiState
 import com.example.quickorderapp.viewmodel.ProductViewModel
+import com.example.quickorderapp.viewmodel.SaveStatus
 
 @Composable
 fun AddProductScreen(
@@ -42,15 +42,23 @@ fun AddProductScreen(
     viewModel: ProductViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val saveStatus by viewModel.saveStatus.collectAsStateWithLifecycle()
+
+    LaunchedEffect(saveStatus) {
+        if (saveStatus is SaveStatus.Success) {
+            viewModel.resetSaveStatus()
+            navController.popBackStack()
+        }
+    }
 
     AddProductScreenContent(
         productId = productId,
         uiState = uiState,
+        saveStatus = saveStatus,
         onBack = { navController.popBackStack() },
-        onSave = { product ->
+        onSaveProduct = { product ->
             if (productId == -1) viewModel.addProduct(product)
             else viewModel.updateProduct(product)
-            navController.popBackStack()
         }
     )
 }
@@ -60,8 +68,9 @@ fun AddProductScreen(
 fun AddProductScreenContent(
     productId: Int,
     uiState: ProductUiState,
+    saveStatus: SaveStatus,
     onBack: () -> Unit,
-    onSave: (Product) -> Unit
+    onSaveProduct: (Product) -> Unit
 ) {
     var nombre by remember { mutableStateOf("") }
     var precio by remember { mutableStateOf("") }
@@ -110,20 +119,29 @@ fun AddProductScreenContent(
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
+            // Selector de Imagen
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(200.dp)
                     .clip(RoundedCornerShape(12.dp))
                     .background(Color.LightGray.copy(alpha = 0.3f))
-                    .border(1.dp, Color.Green, RoundedCornerShape(12.dp))
+                    .border(1.dp, colorResource(R.color.esmeralda), RoundedCornerShape(12.dp))
                     .clickable { photoPickerLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) },
                 contentAlignment = Alignment.Center
             ) {
-                if (imagenUrl.isNotBlank()) AsyncImage(model = imagenUrl, contentDescription = null, modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
-                else Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Icon(Icons.Default.AddCircle, contentDescription = null, modifier = Modifier.size(48.dp), tint = Color.Gray)
-                    Text("Toca para añadir foto", color = Color.Gray)
+                if (imagenUrl.isNotBlank()) {
+                    AsyncImage(
+                        model = imagenUrl,
+                        contentDescription = null,
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop
+                    )
+                } else {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Icon(Icons.Default.AddCircle, contentDescription = null, modifier = Modifier.size(48.dp), tint = Color.Gray)
+                        Text("Toca para añadir foto", color = Color.Gray)
+                    }
                 }
             }
 
@@ -132,11 +150,7 @@ fun AddProductScreenContent(
                 onValueChange = { nombre = it }, 
                 label = { Text("Nombre del producto") }, 
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp),
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = colorResource(R.color.esmeralda),
-                    unfocusedBorderColor = colorResource(R.color.esmeralda)
-                )
+                shape = RoundedCornerShape(12.dp)
             )
             
             OutlinedTextField(
@@ -145,11 +159,7 @@ fun AddProductScreenContent(
                 label = { Text("Precio") }, 
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal), 
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp),
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = colorResource(R.color.esmeralda),
-                    unfocusedBorderColor = colorResource(R.color.esmeralda)
-                )
+                shape = RoundedCornerShape(12.dp)
             )
 
             OutlinedTextField(
@@ -158,17 +168,18 @@ fun AddProductScreenContent(
                 label = { Text("Descripción") }, 
                 modifier = Modifier.fillMaxWidth(), 
                 minLines = 3,
-                shape = RoundedCornerShape(12.dp),
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = colorResource(R.color.esmeralda),
-                    unfocusedBorderColor = colorResource(R.color.esmeralda)
-                )
+                shape = RoundedCornerShape(12.dp)
             )
 
             Text("Categoría", style = MaterialTheme.typography.labelLarge)
             Row(Modifier.horizontalScroll(rememberScrollState())) {
                 listOf("Entradas", "Platos Fuertes", "Bebidas", "Postres").forEach { cat ->
-                    FilterChip(selected = categoria == cat, onClick = { categoria = cat }, label = { Text(cat) }, modifier = Modifier.padding(end = 4.dp))
+                    FilterChip(
+                        selected = categoria == cat, 
+                        onClick = { categoria = cat }, 
+                        label = { Text(cat) }, 
+                        modifier = Modifier.padding(end = 4.dp)
+                    )
                 }
             }
 
@@ -184,24 +195,37 @@ fun AddProductScreenContent(
                     label = { Text("% Descuento") }, 
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number), 
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = colorResource(R.color.esmeralda),
-                        unfocusedBorderColor = colorResource(R.color.esmeralda)
-                    )
+                    shape = RoundedCornerShape(12.dp)
                 )
             }
 
+            if (saveStatus is SaveStatus.Error) {
+                Text(saveStatus.message, color = MaterialTheme.colorScheme.error)
+            }
+
             Button(
-                enabled = nombre.isNotBlank() && precio.isNotBlank(),
+                enabled = nombre.isNotBlank() && precio.isNotBlank() && saveStatus !is SaveStatus.Saving,
                 onClick = {
-                    onSave(Product(id = if (productId == -1) 0 else productId, nombre = nombre, precio = precio.toDoubleOrNull() ?: 0.0, descripcion = descripcion, imagenUrl = imagenUrl, categoria = categoria, descuento = if (esPromocion) (descuento.toDoubleOrNull() ?: 0.0) else 0.0, esPromocion = esPromocion))
+                    onSaveProduct(Product(
+                        id = if (productId == -1) 0 else productId, 
+                        nombre = nombre, 
+                        precio = precio.toDoubleOrNull() ?: 0.0, 
+                        descripcion = descripcion, 
+                        imagenUrl = imagenUrl, 
+                        categoria = categoria, 
+                        descuento = if (esPromocion) (descuento.toDoubleOrNull() ?: 0.0) else 0.0, 
+                        esPromocion = esPromocion
+                    ))
                 },
                 modifier = Modifier.fillMaxWidth().height(56.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = colorResource(R.color.esmeralda)),
                 shape = RoundedCornerShape(12.dp)
             ) {
-                Text(if (productId == -1) "Guardar Producto" else "Actualizar Producto")
+                if (saveStatus is SaveStatus.Saving) {
+                    CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp))
+                } else {
+                    Text(if (productId == -1) "Guardar Producto" else "Actualizar Producto")
+                }
             }
         }
     }
