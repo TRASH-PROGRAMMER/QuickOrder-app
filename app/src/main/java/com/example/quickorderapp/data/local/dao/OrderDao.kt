@@ -16,6 +16,9 @@ interface OrderDao {
     fun getByUserEmail(email: String): Flow<List<OrderEntity>>
 
     @Query("SELECT * FROM pedidos WHERE id = :id")
+    fun getByIdFlow(id: Int): Flow<OrderEntity?>
+
+    @Query("SELECT * FROM pedidos WHERE id = :id")
     suspend fun getById(id: Int): OrderEntity?
 
     @Query("SELECT MAX(orderNumber) FROM pedidos")

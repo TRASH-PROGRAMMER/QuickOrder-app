@@ -63,8 +63,12 @@ class ProductViewModel @Inject constructor(
         viewModelScope.launch {
             _saveStatus.value = SaveStatus.Saving
             try {
-                addProductUseCase(product)
-                _saveStatus.value = SaveStatus.Success
+                val success = addProductUseCase(product)
+                if (success) {
+                    _saveStatus.value = SaveStatus.Success
+                } else {
+                    _saveStatus.value = SaveStatus.Error("Error al guardar localmente")
+                }
             } catch (e: Exception) {
                 _saveStatus.value = SaveStatus.Error(e.localizedMessage ?: "Error al guardar")
             }
@@ -75,11 +79,21 @@ class ProductViewModel @Inject constructor(
         viewModelScope.launch {
             _saveStatus.value = SaveStatus.Saving
             try {
-                updateProductUseCase(product)
-                _saveStatus.value = SaveStatus.Success
+                val success = updateProductUseCase(product)
+                if (success) {
+                    _saveStatus.value = SaveStatus.Success
+                } else {
+                    _saveStatus.value = SaveStatus.Error("Error al actualizar localmente")
+                }
             } catch (e: Exception) {
                 _saveStatus.value = SaveStatus.Error(e.localizedMessage ?: "Error al actualizar")
             }
+        }
+    }
+
+    fun toggleAvailability(product: Product) {
+        viewModelScope.launch {
+            updateProductUseCase(product.copy(disponible = !product.disponible))
         }
     }
 
@@ -87,9 +101,7 @@ class ProductViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 deleteProductUseCase(product)
-            } catch (e: Exception) {
-                // Error al eliminar
-            }
+            } catch (e: Exception) { }
         }
     }
 

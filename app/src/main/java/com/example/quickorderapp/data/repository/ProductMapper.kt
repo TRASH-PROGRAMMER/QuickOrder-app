@@ -14,6 +14,7 @@ fun ProductEntity.toDomain(): Product {
         categoria = categoria,
         descuento = descuento,
         esPromocion = esPromocion,
+        disponible = disponible,
         ultimoCambio = ultimoCambio
     )
 }
@@ -29,6 +30,7 @@ fun Product.toEntity(): ProductEntity {
         categoria = categoria,
         descuento = descuento,
         esPromocion = esPromocion,
+        disponible = disponible,
         ultimoCambio = ultimoCambio
     )
 }

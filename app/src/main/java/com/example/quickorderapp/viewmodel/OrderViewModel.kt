@@ -160,16 +160,18 @@ class OrderViewModel @Inject constructor(
         viewModelScope.launch {
             _orderActionStatus.value = OrderActionStatus.Loading
             try {
-                // Obtenemos el email directamente del Flow para asegurar que no esté vacío
+                // Obtenemos email y nombre directamente del Flow para asegurar datos reales
                 val email = authRepository.getUserEmail().firstOrNull() ?: ""
+                val nombre = authRepository.getUserName().firstOrNull() ?: "Cliente"
                 
                 if (email.isEmpty()) {
                     _orderActionStatus.value = OrderActionStatus.Error("Sesión no válida. Por favor, reinicia sesión.")
                     return@launch
                 }
 
-                val order = Order(
+                val orderToSave = Order(
                     userEmail = email,
+                    clienteNombre = nombre,
                     numeroMesa = state.mesaSeleccionada,
                     total = state.total,
                     notas = state.notas,
@@ -177,12 +179,14 @@ class OrderViewModel @Inject constructor(
                     estado = "PENDIENTE",
                     fecha = System.currentTimeMillis()
                 )
-                val success = orderRepository.saveOrder(order)
+                
+                val success = orderRepository.saveOrder(orderToSave)
+                
                 if (success) {
-                    _cartState.value = CartState() // Limpiar pedido tras éxito
-                    _orderActionStatus.value = OrderActionStatus.Success(order)
+                    _cartState.update { CartState() } // Limpiar pedido tras éxito
+                    _orderActionStatus.value = OrderActionStatus.Success(orderToSave)
                 } else {
-                    _orderActionStatus.value = OrderActionStatus.Error("Error al guardar el pedido localmente")
+                    _orderActionStatus.value = OrderActionStatus.Error("Error al guardar el pedido")
                 }
             } catch (e: Exception) {
                 _orderActionStatus.value = OrderActionStatus.Error("Error crítico: ${e.localizedMessage}")

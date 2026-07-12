@@ -9,6 +9,12 @@ interface MesaDao {
     @Query("SELECT * FROM mesas ORDER BY numero ASC")
     fun getAll(): Flow<List<MesaEntity>>
 
+    @Query("SELECT * FROM mesas")
+    suspend fun getAllList(): List<MesaEntity>
+
+    @Query("SELECT * FROM mesas WHERE numero = :numero LIMIT 1")
+    suspend fun getByNumero(numero: Int): MesaEntity?
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(mesa: MesaEntity)
 

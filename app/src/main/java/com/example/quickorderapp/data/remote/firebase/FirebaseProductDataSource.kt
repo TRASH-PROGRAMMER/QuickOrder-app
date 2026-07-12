@@ -32,6 +32,7 @@ class FirebaseProductDataSource @Inject constructor(
                 "categoria" to product.categoria,
                 "descuento" to product.descuento,
                 "esPromocion" to product.esPromocion,
+                "disponible" to product.disponible,
                 "ultimoCambio" to product.ultimoCambio
             )
             // Usamos UID como identificador único en Firestore
@@ -87,6 +88,7 @@ class FirebaseProductDataSource @Inject constructor(
                         categoria = doc.getString("categoria") ?: "",
                         descuento = doc.getDouble("descuento") ?: 0.0,
                         esPromocion = doc.getBoolean("esPromocion") ?: false,
+                        disponible = doc.getBoolean("disponible") ?: true,
                         ultimoCambio = cloudUltimoCambio
                     )
                     entitiesToUpdate.add(product.toEntity())

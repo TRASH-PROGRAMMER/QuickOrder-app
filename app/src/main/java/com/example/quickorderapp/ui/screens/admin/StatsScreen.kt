@@ -2,18 +2,20 @@
 package com.example.quickorderapp.ui.screens.admin
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.TrendingUp
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.colorResource
@@ -25,6 +27,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.quickorderapp.R
 import com.example.quickorderapp.domain.model.Order
 import com.example.quickorderapp.viewmodel.MeseroViewModel
+import java.util.*
 
 @Composable
 fun StatsScreen(
@@ -55,11 +58,13 @@ fun StatsScreen(
             }
         } else {
             val orders = uiState.orders
-            val completed = orders.count { it.estado == "COMPLETADO" }
-            val pending = orders.count { it.estado == "PENDIENTE" }
-            val inProgress = orders.count { it.estado == "EN PREPARACIÓN" }
-            val cancelled = orders.count { it.estado == "CANCELADO" }
-            val totalVentas = orders.filter { it.estado == "COMPLETADO" }.sumOf { it.total }
+            val filteredOrders = filterOrdersByPeriod(orders, selectedPeriod)
+            
+            val completed = filteredOrders.count { it.estado == "COMPLETADO" }
+            val pending = filteredOrders.count { it.estado == "PENDIENTE" }
+            val inProgress = filteredOrders.count { it.estado == "EN PREPARACIÓN" }
+            val cancelled = filteredOrders.count { it.estado == "CANCELADO" }
+            val totalVentas = filteredOrders.filter { it.estado == "COMPLETADO" }.sumOf { it.total }
 
             Column(
                 modifier = Modifier
@@ -70,25 +75,19 @@ fun StatsScreen(
                 verticalArrangement = Arrangement.spacedBy(20.dp)
             ) {
                 // Selector de Período
-                ScrollableTabRow(
-                    selectedTabIndex = periods.indexOf(selectedPeriod),
-                    edgePadding = 0.dp,
-                    containerColor = Color.Transparent,
-                    divider = {},
-                    indicator = {}
-                ) {
-                    periods.forEach { period ->
-                        Tab(
-                            selected = selectedPeriod == period,
-                            onClick = { selectedPeriod = period },
-                            text = { 
-                                Text(
-                                    period, 
-                                    fontWeight = if (selectedPeriod == period) FontWeight.Bold else FontWeight.Normal,
-                                    color = if (selectedPeriod == period) colorResource(R.color.esmeralda) else MaterialTheme.colorScheme.onSurfaceVariant
-                                ) 
-                            }
-                        )
+                SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
+                    periods.forEachIndexed { index, label ->
+                        SegmentedButton(
+                            shape = SegmentedButtonDefaults.itemShape(index = index, count = periods.size),
+                            onClick = { selectedPeriod = label },
+                            selected = selectedPeriod == label,
+                            colors = SegmentedButtonDefaults.colors(
+                                activeContainerColor = colorResource(R.color.esmeralda),
+                                activeContentColor = Color.White
+                            )
+                        ) {
+                            Text(label, style = MaterialTheme.typography.labelSmall)
+                        }
                     }
                 }
 
@@ -101,12 +100,12 @@ fun StatsScreen(
                     )
                 ) {
                     Column(modifier = Modifier.padding(24.dp)) {
-                        Text("Ventas Totales (Completados)", color = Color.White.copy(alpha = 0.8f), style = MaterialTheme.typography.labelLarge)
+                        Text("Ventas del Periodo", color = Color.White.copy(alpha = 0.8f), style = MaterialTheme.typography.labelLarge)
                         Text("$${String.format("%.2f", totalVentas)}", color = Color.White, style = MaterialTheme.typography.headlineLarge, fontWeight = FontWeight.ExtraBold)
                         Spacer(Modifier.height(8.dp))
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(Icons.Default.TrendingUp, null, tint = Color.White, modifier = Modifier.size(16.dp))
-                            Text(" +12% vs periodo anterior", color = Color.White, style = MaterialTheme.typography.labelSmall)
+                            Icon(Icons.AutoMirrored.Filled.TrendingUp, null, tint = Color.White, modifier = Modifier.size(16.dp))
+                            Text(" Datos actualizados en tiempo real", color = Color.White, style = MaterialTheme.typography.labelSmall)
                         }
                     }
                 }
@@ -123,24 +122,182 @@ fun StatsScreen(
                     StatBox("Cancelados", cancelled.toString(), Icons.Default.Cancel, Color(0xFFF44336), modifier = Modifier.weight(1f))
                 }
 
-                // Gráfico Simulado (Placeholder visual profesional)
-                ElevatedCard(
-                    modifier = Modifier.fillMaxWidth().height(240.dp),
-                    shape = RoundedCornerShape(24.dp)
-                ) {
-                    Column(modifier = Modifier.padding(20.dp)) {
-                        Text("Tendencia de Pedidos", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
-                        Spacer(Modifier.weight(1f))
-                        Box(modifier = Modifier.fillMaxWidth().height(140.dp).background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f), RoundedCornerShape(12.dp)), contentAlignment = Alignment.Center) {
-                            Text("Gráfico de Líneas", color = Color.Gray, style = MaterialTheme.typography.labelMedium)
-                            // Aquí iría la implementación de Canvas para el gráfico de líneas
+                // Gráfico de Barras Interactivo Real
+                BarChartCard(filteredOrders, selectedPeriod)
+                
+                Spacer(modifier = Modifier.height(24.dp))
+            }
+        }
+    }
+}
+
+@Composable
+fun BarChartCard(orders: List<Order>, period: String) {
+    val dataPoints = remember(orders, period) {
+        getChartDataPoints(orders, period)
+    }
+
+    ElevatedCard(
+        modifier = Modifier.fillMaxWidth().height(350.dp),
+        shape = RoundedCornerShape(24.dp)
+    ) {
+        Column(modifier = Modifier.padding(20.dp)) {
+            Text("Distribución de Pedidos", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
+            Spacer(Modifier.height(24.dp))
+            
+            if (dataPoints.isEmpty() || dataPoints.all { it.second == 0f }) {
+                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text("No hay pedidos registrados en este periodo para graficar", color = Color.Gray, fontSize = 12.sp)
+                }
+            } else {
+                val barColor = colorResource(R.color.esmeralda)
+                val backgroundColor = colorResource(R.color.esmeralda).copy(alpha = 0.05f)
+                
+                Column(modifier = Modifier.fillMaxSize()) {
+                    Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
+                        Canvas(modifier = Modifier.fillMaxSize()) {
+                            val width = size.width
+                            val height = size.height
+                            val maxVal = dataPoints.maxOf { it.second }.coerceAtLeast(1f)
+                            
+                            val barWidth = (width / dataPoints.size) * 0.6f
+                            val spacing = (width / dataPoints.size) * 0.4f
+                            
+                            dataPoints.forEachIndexed { index, point ->
+                                val barHeight = (point.second / maxVal) * height
+                                val x = index * (barWidth + spacing) + (spacing / 2)
+                                val y = height - barHeight
+                                
+                                // Draw background column
+                                drawRect(
+                                    color = backgroundColor,
+                                    topLeft = Offset(x, 0f),
+                                    size = Size(barWidth, height)
+                                )
+                                
+                                // Draw actual bar
+                                if (barHeight > 0) {
+                                    drawRoundRect(
+                                        color = barColor,
+                                        topLeft = Offset(x, y),
+                                        size = Size(barWidth, barHeight),
+                                        cornerRadius = androidx.compose.ui.geometry.CornerRadius(6.dp.toPx())
+                                    )
+                                }
+                            }
+                        }
+                    }
+                    
+                    Spacer(Modifier.height(8.dp))
+                    
+                    // Labels row
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                        dataPoints.forEach { point ->
+                            Text(
+                                text = point.first,
+                                fontSize = 9.sp,
+                                color = Color.Gray,
+                                modifier = Modifier.width(IntrinsicSize.Min),
+                                fontWeight = FontWeight.Medium
+                            )
                         }
                     }
                 }
-                
-                Spacer(Modifier.height(24.dp))
             }
         }
+    }
+}
+
+fun filterOrdersByPeriod(orders: List<Order>, period: String): List<Order> {
+    val calendar = Calendar.getInstance()
+    
+    return when (period) {
+        "Hoy" -> {
+            calendar.set(Calendar.HOUR_OF_DAY, 0)
+            calendar.set(Calendar.MINUTE, 0)
+            calendar.set(Calendar.SECOND, 0)
+            orders.filter { it.fecha >= calendar.timeInMillis }
+        }
+        "Ayer" -> {
+            calendar.add(Calendar.DAY_OF_YEAR, -1)
+            calendar.set(Calendar.HOUR_OF_DAY, 0)
+            calendar.set(Calendar.MINUTE, 0)
+            calendar.set(Calendar.SECOND, 0)
+            val start = calendar.timeInMillis
+            calendar.set(Calendar.HOUR_OF_DAY, 23)
+            calendar.set(Calendar.MINUTE, 59)
+            calendar.set(Calendar.SECOND, 59)
+            val end = calendar.timeInMillis
+            orders.filter { it.fecha in start..end }
+        }
+        "7 días" -> {
+            calendar.add(Calendar.DAY_OF_YEAR, -7)
+            calendar.set(Calendar.HOUR_OF_DAY, 0)
+            calendar.set(Calendar.MINUTE, 0)
+            calendar.set(Calendar.SECOND, 0)
+            orders.filter { it.fecha >= calendar.timeInMillis }
+        }
+        "Este Mes" -> {
+            calendar.set(Calendar.DAY_OF_MONTH, 1)
+            calendar.set(Calendar.HOUR_OF_DAY, 0)
+            calendar.set(Calendar.MINUTE, 0)
+            calendar.set(Calendar.SECOND, 0)
+            orders.filter { it.fecha >= calendar.timeInMillis }
+        }
+        else -> orders
+    }
+}
+
+fun getChartDataPoints(orders: List<Order>, period: String): List<Pair<String, Float>> {
+    return when (period) {
+        "Hoy", "Ayer" -> {
+            // 8 bloques de 3 horas: 0-3, 3-6, ..., 21-24
+            (0..7).map { i ->
+                val hourStart = i * 3
+                val hourEnd = hourStart + 2
+                val count = orders.count {
+                    val cal = Calendar.getInstance().apply { timeInMillis = it.fecha }
+                    cal.get(Calendar.HOUR_OF_DAY) in hourStart..hourEnd
+                }
+                "${hourStart}h" to count.toFloat()
+            }
+        }
+        "7 días" -> {
+            val days = listOf("Lun", "Mar", "Mie", "Jue", "Vie", "Sab", "Dom")
+            val calendar = Calendar.getInstance()
+            // Obtener los últimos 7 días terminando en hoy
+            (0..6).map { i ->
+                val cal = Calendar.getInstance()
+                cal.add(Calendar.DAY_OF_YEAR, - (6 - i))
+                val dayOfWeek = cal.get(Calendar.DAY_OF_WEEK)
+                val dayLabel = when(dayOfWeek) {
+                    Calendar.MONDAY -> "Lun"
+                    Calendar.TUESDAY -> "Mar"
+                    Calendar.WEDNESDAY -> "Mie"
+                    Calendar.THURSDAY -> "Jue"
+                    Calendar.FRIDAY -> "Vie"
+                    Calendar.SATURDAY -> "Sab"
+                    else -> "Dom"
+                }
+                val count = orders.count {
+                    val orderCal = Calendar.getInstance().apply { timeInMillis = it.fecha }
+                    orderCal.get(Calendar.DAY_OF_YEAR) == cal.get(Calendar.DAY_OF_YEAR)
+                }
+                dayLabel to count.toFloat()
+            }
+        }
+        "Este Mes" -> {
+            // Dividir en 4 semanas
+            (1..4).map { week ->
+                val count = orders.count {
+                    val cal = Calendar.getInstance().apply { timeInMillis = it.fecha }
+                    val weekOfMonth = cal.get(Calendar.WEEK_OF_MONTH)
+                    weekOfMonth == week
+                }
+                "Sem $week" to count.toFloat()
+            }
+        }
+        else -> emptyList()
     }
 }
 

@@ -7,5 +7,5 @@ import javax.inject.Inject
 class DeleteProductUseCase @Inject constructor(
     private val repository: ProductRepository
 ) {
-    suspend operator fun invoke(product: Product) = repository.deleteProduct(product)
+    suspend operator fun invoke(product: Product): Boolean = repository.deleteProduct(product)
 }

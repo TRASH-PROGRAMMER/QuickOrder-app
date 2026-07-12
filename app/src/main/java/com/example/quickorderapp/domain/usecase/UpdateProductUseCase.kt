@@ -7,5 +7,5 @@ import javax.inject.Inject
 class UpdateProductUseCase @Inject constructor(
     private val repository: ProductRepository
 ) {
-    suspend operator fun invoke(product: Product) = repository.updateProduct(product)
+    suspend operator fun invoke(product: Product): Boolean = repository.updateProduct(product)
 }

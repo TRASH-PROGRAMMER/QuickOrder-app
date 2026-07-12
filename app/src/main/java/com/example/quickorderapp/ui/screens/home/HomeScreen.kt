@@ -132,11 +132,24 @@ fun HomeScreen(
                 cartState = cartState,
                 mesas = mesas,
                 onDismiss = { showSummary = false },
-                onSetMesa = { orderViewModel.setMesa(it) },
+                onSetMesa = { mesaNum ->
+                    val mesa = mesas.find { it.numero == mesaNum }
+                    if (mesa?.estado == "Libre") {
+                        orderViewModel.setMesa(mesaNum)
+                    } else {
+                        scope.launch {
+                            snackbarHostState.showSnackbar("Esa mesa ya tiene un pedido activo o está reservada.")
+                        }
+                    }
+                },
                 onSetNotas = { orderViewModel.setNotas(it) },
                 onConfirm = { 
                     if (cartState.mesaSeleccionada != null) {
                         orderViewModel.confirmOrder()
+                    } else {
+                        scope.launch {
+                            snackbarHostState.showSnackbar("Debes seleccionar una mesa")
+                        }
                     }
                 },
                 isLoading = orderStatus is OrderActionStatus.Loading
@@ -293,7 +306,9 @@ fun HomeScreenContent(
                         }
                     }
                     is ProductUiState.Success -> {
-                        val filteredProducts = uiState.products.filter { it.categoria == selectedCategory }
+                        val filteredProducts = uiState.products
+                            .filter { it.categoria == selectedCategory }
+                            .filter { if (userRole == "ADMIN") true else it.disponible }
                         
                         if (filteredProducts.isEmpty()) {
                             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {

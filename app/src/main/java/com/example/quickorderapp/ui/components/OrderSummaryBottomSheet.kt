@@ -1,8 +1,10 @@
 package com.example.quickorderapp.ui.components
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
@@ -12,6 +14,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.font.FontWeight
@@ -126,12 +129,37 @@ fun OrderSummaryBottomSheet(
                 modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                mesas.filter { it.estado == "Libre" }.forEach { mesa ->
+                mesas.forEach { mesa ->
+                    val isAvailable = mesa.estado == "Libre"
+                    val color = when(mesa.estado) {
+                        "Libre" -> Color(0xFF4CAF50)
+                        "Ocupada" -> Color(0xFFF44336)
+                        "Reservada" -> Color(0xFFFFA000)
+                        else -> Color.Gray
+                    }
+
                     FilterChip(
                         selected = cartState.mesaSeleccionada == mesa.numero,
-                        onClick = { onSetMesa(mesa.numero) },
-                        label = { Text("Mesa ${mesa.numero}") },
-                        shape = RoundedCornerShape(12.dp)
+                        onClick = { 
+                            if (isAvailable) {
+                                onSetMesa(mesa.numero)
+                            } else {
+                                // Feedback for unavailable mesa
+                            }
+                        },
+                        label = { 
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Box(modifier = Modifier.size(8.dp).clip(CircleShape).background(color))
+                                Spacer(Modifier.width(6.dp))
+                                Text("Mesa ${mesa.numero}") 
+                            }
+                        },
+                        shape = RoundedCornerShape(12.dp),
+                        enabled = true, // We keep it enabled to show feedback if clicked
+                        colors = FilterChipDefaults.filterChipColors(
+                            selectedContainerColor = colorResource(R.color.esmeralda).copy(alpha = 0.2f),
+                            selectedLabelColor = colorResource(R.color.esmeralda)
+                        )
                     )
                 }
             }

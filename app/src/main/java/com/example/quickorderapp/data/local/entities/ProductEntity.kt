@@ -22,5 +22,6 @@ data class ProductEntity(
     val categoria: String = "",
     val descuento: Double = 0.0,
     val esPromocion: Boolean = false,
+    val disponible: Boolean = true,
     val ultimoCambio: Long = System.currentTimeMillis()
 )

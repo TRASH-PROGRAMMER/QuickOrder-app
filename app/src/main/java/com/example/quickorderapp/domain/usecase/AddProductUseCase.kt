@@ -10,7 +10,7 @@ import javax.inject.Inject
 class AddProductUseCase @Inject constructor(
     private val productRepository: ProductRepository
 ) {
-    suspend operator fun invoke(product: Product) {
-        productRepository.addProduct(product)
+    suspend operator fun invoke(product: Product): Boolean {
+        return productRepository.addProduct(product)
     }
 }

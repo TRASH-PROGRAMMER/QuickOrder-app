@@ -19,6 +19,7 @@ import androidx.navigation.compose.*
 import androidx.navigation.navArgument
 import com.example.quickorderapp.R
 import com.example.quickorderapp.ui.screens.admin.AdminDashboardScreen
+import com.example.quickorderapp.ui.screens.admin.AdminProductListScreen
 import com.example.quickorderapp.ui.screens.home.AboutUsConsumerScreen
 import com.example.quickorderapp.ui.screens.home.DailyMessageConsumerScreen
 import com.example.quickorderapp.ui.screens.home.HomeScreen
@@ -47,7 +48,11 @@ fun MainScreen(
 @Composable
 fun AdminMainScreen(rootNavController: NavController) {
     val navController = rememberNavController()
-    val items = listOf(Screen.Inicio, Screen.Perfil)
+    val items = listOf(
+        Screen.Inicio,
+        Screen.Productos,
+        Screen.Perfil
+    )
 
     Scaffold(
         bottomBar = {
@@ -78,7 +83,8 @@ fun AdminMainScreen(rootNavController: NavController) {
             modifier = Modifier.padding(innerPadding)
         ) {
             composable(Screen.Inicio.route) { AdminDashboardScreen(rootNavController) }
-            composable(Screen.Perfil.route) { ProfileScreen() }
+            composable(Screen.Productos.route) { AdminProductListScreen(rootNavController) }
+            composable(Screen.Perfil.route) { ProfileScreen(navController = rootNavController) }
         }
     }
 }
@@ -186,6 +192,7 @@ fun ClientMainScreen(
                 }
                 composable(Screen.Perfil.route) {
                     ProfileScreen(
+                        navController = rootNavController,
                         onOpenDrawer = { scope.launch { drawerState.open() } }
                     )
                 }
@@ -215,6 +222,7 @@ data class DrawerItem(val title: String, val icon: androidx.compose.ui.graphics.
 
 sealed class Screen(val route: String, val title: String, val icon: androidx.compose.ui.graphics.vector.ImageVector) {
     object Inicio : Screen("inicio", "Inicio", Icons.Default.Home)
+    object Productos : Screen("productos", "Productos", Icons.Default.RestaurantMenu)
     object Pedido : Screen("pedido", "Pedido", Icons.Default.ShoppingCart)
     object Perfil : Screen("perfil", "Mi Perfil", Icons.Default.Person)
 }

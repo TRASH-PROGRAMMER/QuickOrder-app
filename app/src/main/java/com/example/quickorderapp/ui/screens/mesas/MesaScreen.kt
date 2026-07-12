@@ -185,11 +185,11 @@ fun MesaDialog(
                 )
                 
                 Text("Estado", style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold)
-                Row(
+                FlowRow(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    listOf("Libre", "Inactiva").forEach { est ->
+                    listOf("Libre", "Ocupada", "Reservada").forEach { est ->
                         FilterChip(
                             selected = estado == est,
                             onClick = { estado = est },

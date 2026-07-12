@@ -10,9 +10,11 @@ import com.example.quickorderapp.data.remote.firebase.FirebaseSyncManager
 import com.example.quickorderapp.domain.model.Category
 import com.example.quickorderapp.domain.model.Product
 import com.example.quickorderapp.domain.repository.ProductRepository
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -38,34 +40,55 @@ class ProductRepositoryImpl @Inject constructor(
         return categoryDao.getAll().map { it.toCategoryDomainList() }
     }
 
-    override suspend fun addProduct(product: Product) = withContext(Dispatchers.IO) {
-        val productWithTimestamp = product.copy(ultimoCambio = System.currentTimeMillis())
-        val toSave = uploadImageIfNeeded(productWithTimestamp)
-        productDao.insert(toSave.toEntity())
-        if (syncManager.hasInternetConnection()) {
-            try {
-                firebaseProductDataSource.addProduct(toSave)
-            } catch (e: Exception) { }
+    override suspend fun addProduct(product: Product): Boolean = withContext(Dispatchers.IO) {
+        try {
+            val productWithTimestamp = product.copy(ultimoCambio = System.currentTimeMillis())
+            val toSave = uploadImageIfNeeded(productWithTimestamp)
+            productDao.insert(toSave.toEntity())
+            if (syncManager.hasInternetConnection()) {
+                CoroutineScope(Dispatchers.IO).launch {
+                    try {
+                        firebaseProductDataSource.addProduct(toSave)
+                    } catch (e: Exception) { }
+                }
+            }
+            true
+        } catch (e: Exception) {
+            false
         }
     }
 
-    override suspend fun updateProduct(product: Product) = withContext(Dispatchers.IO) {
-        val productWithTimestamp = product.copy(ultimoCambio = System.currentTimeMillis())
-        val toSave = uploadImageIfNeeded(productWithTimestamp)
-        productDao.update(toSave.toEntity())
-        if (syncManager.hasInternetConnection()) {
-            try {
-                firebaseProductDataSource.updateProduct(toSave)
-            } catch (e: Exception) { }
+    override suspend fun updateProduct(product: Product): Boolean = withContext(Dispatchers.IO) {
+        try {
+            val productWithTimestamp = product.copy(ultimoCambio = System.currentTimeMillis())
+            val toSave = uploadImageIfNeeded(productWithTimestamp)
+            productDao.update(toSave.toEntity())
+            if (syncManager.hasInternetConnection()) {
+                CoroutineScope(Dispatchers.IO).launch {
+                    try {
+                        firebaseProductDataSource.updateProduct(toSave)
+                    } catch (e: Exception) { }
+                }
+            }
+            true
+        } catch (e: Exception) {
+            false
         }
     }
 
-    override suspend fun deleteProduct(product: Product) = withContext(Dispatchers.IO) {
-        productDao.delete(product.toEntity())
-        if (syncManager.hasInternetConnection()) {
-            try {
-                firebaseProductDataSource.deleteProduct(product)
-            } catch (e: Exception) { }
+    override suspend fun deleteProduct(product: Product): Boolean = withContext(Dispatchers.IO) {
+        try {
+            productDao.delete(product.toEntity())
+            if (syncManager.hasInternetConnection()) {
+                CoroutineScope(Dispatchers.IO).launch {
+                    try {
+                        firebaseProductDataSource.deleteProduct(product)
+                    } catch (e: Exception) { }
+                }
+            }
+            true
+        } catch (e: Exception) {
+            false
         }
     }
 

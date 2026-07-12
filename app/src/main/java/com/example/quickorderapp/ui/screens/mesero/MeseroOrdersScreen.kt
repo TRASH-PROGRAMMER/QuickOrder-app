@@ -107,7 +107,7 @@ fun MeseroOrderCard(order: Order, onClick: () -> Unit) {
         Column(modifier = Modifier.padding(20.dp)) {
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                 Column {
-                    Text("Pedido #${order.orderNumber}", style = MaterialTheme.typography.labelSmall, color = Color.Gray)
+                    Text("Factura #${order.orderNumber}", style = MaterialTheme.typography.labelSmall, color = Color.Gray)
                     Text("Mesa ${order.numeroMesa}", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.ExtraBold)
                 }
                 Surface(
@@ -124,7 +124,7 @@ fun MeseroOrderCard(order: Order, onClick: () -> Unit) {
                 }
             }
             
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(12.dp))
             
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(Icons.Default.Person, null, modifier = Modifier.size(16.dp), tint = Color.Gray)
@@ -136,10 +136,21 @@ fun MeseroOrderCard(order: Order, onClick: () -> Unit) {
                 )
             }
             
+            // List names of items in the card
+            val productNames = order.items.joinToString { "${it.cantidad}x ${it.productoNombre}" }
+            if (productNames.isNotEmpty()) {
+                Text(
+                    text = productNames,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = Color.Gray,
+                    maxLines = 2,
+                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+                    modifier = Modifier.padding(top = 4.dp, start = 24.dp)
+                )
+            }
+
             Spacer(modifier = Modifier.height(12.dp))
-            
             HorizontalDivider(color = Color.Gray.copy(alpha = 0.1f))
-            
             Spacer(modifier = Modifier.height(12.dp))
             
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {

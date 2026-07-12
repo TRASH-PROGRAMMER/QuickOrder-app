@@ -26,7 +26,7 @@ object DatabaseModule {
         return Room.databaseBuilder(
             context,
             AppDatabase::class.java,
-            "quick_order_database_v10" // Incrementado para forzar la creación con el nuevo esquema (orderNumber)
+            "quick_order_database_v11" // Incrementado para incluir campo 'disponible' en productos
         )
         .addCallback(object : RoomDatabase.Callback() {
             override fun onCreate(db: SupportSQLiteDatabase) {

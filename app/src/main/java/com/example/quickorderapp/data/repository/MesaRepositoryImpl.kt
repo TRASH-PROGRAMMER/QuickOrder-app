@@ -19,6 +19,11 @@ class MesaRepositoryImpl @Inject constructor(
     private val syncManager: FirebaseSyncManager
 ) : MesaRepository {
 
+    init {
+        // Iniciamos la sincronización en tiempo real al instanciar el repositorio
+        firebaseMesaDataSource.startRealtimeMesaSync(kotlinx.coroutines.CoroutineScope(Dispatchers.IO))
+    }
+
     override fun getMesas(): Flow<List<Mesa>> {
         if (syncManager.hasInternetConnection()) {
             syncManager.syncAll()

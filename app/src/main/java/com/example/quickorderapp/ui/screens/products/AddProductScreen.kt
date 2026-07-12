@@ -108,6 +108,7 @@ fun AddProductScreenContent(
     var categoria by remember { mutableStateOf("Entradas") }
     var descuento by remember { mutableStateOf("0") }
     var esPromocion by remember { mutableStateOf(false) }
+    var disponible by remember { mutableStateOf(true) }
     var productUid by remember { mutableStateOf(UUID.randomUUID().toString()) }
 
     LaunchedEffect(categories) {
@@ -131,6 +132,7 @@ fun AddProductScreenContent(
                 categoria = it.categoria
                 descuento = it.descuento.toString()
                 esPromocion = it.esPromocion
+                disponible = it.disponible
                 productUid = it.uid
             }
         }
@@ -221,12 +223,14 @@ fun AddProductScreenContent(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(16.dp)
         ) {
-            Row(
-                modifier = Modifier.padding(16.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
                 Checkbox(checked = esPromocion, onCheckedChange = { esPromocion = it })
                 Text("Habilitar Promoción", fontWeight = FontWeight.Medium)
+            }
+
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Checkbox(checked = disponible, onCheckedChange = { disponible = it })
+                Text("Producto Disponible", fontWeight = FontWeight.Medium)
             }
         }
 
@@ -257,7 +261,8 @@ fun AddProductScreenContent(
                     imagenUrl = imagenUrl, 
                     categoria = categoria, 
                     descuento = if (esPromocion) (descuento.toDoubleOrNull() ?: 0.0) else 0.0, 
-                    esPromocion = esPromocion
+                    esPromocion = esPromocion,
+                    disponible = disponible
                 ))
             },
             modifier = Modifier.fillMaxWidth().height(60.dp),

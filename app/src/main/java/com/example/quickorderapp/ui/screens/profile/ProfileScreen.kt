@@ -25,10 +25,14 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.quickorderapp.R
 import com.example.quickorderapp.viewmodel.ProfileUiState
 import com.example.quickorderapp.viewmodel.ProfileViewModel
+import com.example.quickorderapp.viewmodel.HomeViewModel
+import androidx.navigation.NavController
 
 @Composable
 fun ProfileScreen(
+    navController: NavController? = null,
     viewModel: ProfileViewModel = hiltViewModel(),
+    homeViewModel: HomeViewModel = hiltViewModel(),
     onOpenDrawer: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -38,7 +42,14 @@ fun ProfileScreen(
         onOpenDrawer = onOpenDrawer,
         onChangePassword = { pass, confirm -> viewModel.changePassword(pass, confirm) },
         onUpdateProfile = { name, email -> viewModel.updateProfile(name, email) },
-        onClearMessages = { viewModel.clearMessages() }
+        onClearMessages = { viewModel.clearMessages() },
+        onLogout = {
+            homeViewModel.logout {
+                navController?.navigate("login") {
+                    popUpTo(0) { inclusive = true }
+                }
+            }
+        }
     )
 }
 
@@ -49,7 +60,8 @@ fun ProfileScreenContent(
     onOpenDrawer: () -> Unit,
     onChangePassword: (String, String) -> Unit,
     onUpdateProfile: (String, String) -> Unit,
-    onClearMessages: () -> Unit
+    onClearMessages: () -> Unit,
+    onLogout: () -> Unit = {}
 ) {
     var name by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
@@ -207,6 +219,22 @@ fun ProfileScreenContent(
                             Text("Actualizar Contraseña")
                         }
                     }
+                }
+
+                // Botón de Cerrar Sesión
+                Button(
+                    onClick = onLogout,
+                    modifier = Modifier.fillMaxWidth().height(56.dp),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.1f),
+                        contentColor = MaterialTheme.colorScheme.error
+                    ),
+                    border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.error.copy(alpha = 0.2f))
+                ) {
+                    Icon(Icons.Default.Logout, null)
+                    Spacer(Modifier.width(12.dp))
+                    Text("Cerrar Sesión", fontWeight = FontWeight.Bold)
                 }
 
                 Spacer(modifier = Modifier.height(40.dp))
