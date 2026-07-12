@@ -17,6 +17,9 @@ import javax.inject.Singleton
 class FirebaseSyncManager @Inject constructor(
     private val firebaseProductDataSource: FirebaseProductDataSource,
     private val firebaseMesaDataSource: FirebaseMesaDataSource,
+    private val firebaseCategoryDataSource: FirebaseCategoryDataSource,
+    private val firebaseDailyMessageDataSource: FirebaseDailyMessageDataSource,
+    private val firebaseRestaurantInfoDataSource: FirebaseRestaurantInfoDataSource,
     @ApplicationContext private val context: Context
 ) {
     companion object {
@@ -38,11 +41,12 @@ class FirebaseSyncManager @Inject constructor(
         _isSyncing.value = true
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                // Sincronizar productos de Firestore a Room
+                // Sincronizar de Firestore a Room
                 firebaseProductDataSource.syncAllFromCloud()
-                
-                // Sincronizar mesas de Firestore a Room
                 firebaseMesaDataSource.syncAllFromCloud()
+                firebaseCategoryDataSource.syncAllFromCloud()
+                firebaseDailyMessageDataSource.syncAllFromCloud()
+                firebaseRestaurantInfoDataSource.syncFromCloud()
                 
                 _lastSyncTime.value = System.currentTimeMillis()
             } catch (e: Exception) {

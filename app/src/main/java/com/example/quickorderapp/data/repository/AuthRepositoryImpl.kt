@@ -22,9 +22,24 @@ class AuthRepositoryImpl @Inject constructor(
 ) : AuthRepository {
 
     override suspend fun registerUser(user: User): Long = withContext(Dispatchers.IO) {
-        userDao.insert(user.toEntity())
-        firebaseAuthDataSource.registerUser(user)
-        1L
+        try {
+            // Primero aseguramos el registro local (Prioridad Etapa 3 - SSOT)
+            userDao.insert(user.toEntity())
+            
+            // Guardamos la sesión localmente para que el usuario pueda operar de inmediato
+            saveSession(user)
+            
+            // Intentamos sincronizar con Firebase, pero no bloqueamos si falla (Resiliencia)
+            try {
+                firebaseAuthDataSource.registerUser(user)
+            } catch (e: Exception) {
+                // Logueamos pero permitimos continuar
+            }
+            
+            1L // Éxito local confirmado
+        } catch (e: Exception) {
+            0L // Fallo crítico en BD local
+        }
     }
 
     override suspend fun login(email: String, password: String): User? = withContext(Dispatchers.IO) {
@@ -68,6 +83,28 @@ class AuthRepositoryImpl @Inject constructor(
             user?.updatePassword(newPassword)?.await()
             // También deberíamos actualizarlo localmente si quisiéramos mantener paridad offline
             // pero Firebase Auth es la fuente primaria para el password real.
+            true
+        } catch (e: Exception) {
+            false
+        }
+    }
+
+    override suspend fun updateProfile(nombre: String, correo: String): Boolean = withContext(Dispatchers.IO) {
+        try {
+            val firebaseUser = firebaseAuth.currentUser ?: return@withContext false
+            
+            // 1. Actualizar en Firestore
+            firebaseAuthDataSource.updateUserProfile(firebaseUser.uid, nombre, correo)
+            
+            // 2. Actualizar en Room
+            val localUser = userDao.getUserByEmail(firebaseUser.email ?: "")
+            if (localUser != null) {
+                userDao.insert(localUser.copy(nombre = nombre, correo = correo))
+            }
+            
+            // 3. Actualizar sesión
+            sessionManager.saveSession(nombre, correo, localUser?.rol ?: "COMENSAL")
+
             true
         } catch (e: Exception) {
             false

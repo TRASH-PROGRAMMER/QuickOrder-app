@@ -26,7 +26,7 @@ object DatabaseModule {
         return Room.databaseBuilder(
             context,
             AppDatabase::class.java,
-            "quick_order_database_v7" // Limpieza para asegurar funcionamiento de UID único
+            "quick_order_database_v10" // Incrementado para forzar la creación con el nuevo esquema (orderNumber)
         )
         .addCallback(object : RoomDatabase.Callback() {
             override fun onCreate(db: SupportSQLiteDatabase) {
@@ -60,4 +60,13 @@ object DatabaseModule {
 
     @Provides
     fun provideVentaDao(database: AppDatabase): VentaDao = database.ventaDao()
+
+    @Provides
+    fun provideCategoryDao(database: AppDatabase): CategoryDao = database.categoryDao()
+
+    @Provides
+    fun provideDailyMessageDao(database: AppDatabase): DailyMessageDao = database.dailyMessageDao()
+
+    @Provides
+    fun provideRestaurantInfoDao(database: AppDatabase): RestaurantInfoDao = database.restaurantInfoDao()
 }

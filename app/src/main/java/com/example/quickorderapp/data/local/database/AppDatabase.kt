@@ -16,9 +16,12 @@ import com.example.quickorderapp.data.local.entities.*
         UserEntity::class,
         MesaEntity::class,
         PromocionEntity::class,
-        VentaEntity::class
+        VentaEntity::class,
+        CategoryEntity::class,
+        DailyMessageEntity::class,
+        RestaurantInfoEntity::class
     ],
-    version = 5, // Incrementado por campo UID e índices únicos en productos
+    version = 8, // Incrementado por campo orderNumber en OrderEntity
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -29,4 +32,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun mesaDao(): MesaDao
     abstract fun promocionDao(): PromocionDao
     abstract fun ventaDao(): VentaDao
+    abstract fun categoryDao(): CategoryDao
+    abstract fun dailyMessageDao(): DailyMessageDao
+    abstract fun restaurantInfoDao(): RestaurantInfoDao
 }

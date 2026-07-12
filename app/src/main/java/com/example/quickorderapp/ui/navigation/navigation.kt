@@ -13,6 +13,17 @@ import com.example.quickorderapp.ui.screens.mesas.MesaScreen
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
 
+import com.example.quickorderapp.ui.screens.admin.CategoryManagementScreen
+import com.example.quickorderapp.ui.screens.admin.DailyMessageScreen
+import com.example.quickorderapp.ui.screens.admin.AboutUsScreen
+import com.example.quickorderapp.ui.screens.admin.StatsScreen
+
+import com.example.quickorderapp.ui.screens.profile.ProfileScreen
+import com.example.quickorderapp.ui.screens.order.CartScreen
+import com.example.quickorderapp.ui.screens.order.OrderDetailScreen
+
+import com.example.quickorderapp.ui.screens.mesero.MeseroOrderDetailScreen
+
 /**
  * Configura el gráfico de navegación de la aplicación.
  */
@@ -25,9 +36,29 @@ fun NavGraph(startDestination: String) {
         composable("login") { LoginScreen(navController) }
         composable("register") { RegisterScreen(navController) }
         composable("main") { MainScreen(navController) }
-        composable("home") { MainScreen(navController) } // Redirigir a MainScreen si se intenta ir a home
+        composable("home") { MainScreen(navController) }
         composable("ProductScreen") { ProductScreen() }
         composable("MesaScreen") { MesaScreen() }
+        composable("category_mgmt") { CategoryManagementScreen() }
+        composable("daily_message") { DailyMessageScreen() }
+        composable("about_us") { AboutUsScreen() }
+        composable("stats") { StatsScreen() }
+        composable("perfil") { ProfileScreen() }
+        composable("cart") { CartScreen(navController) }
+        composable(
+            route = "order_detail/{orderId}",
+            arguments = listOf(navArgument("orderId") { type = NavType.IntType })
+        ) { backStackEntry ->
+            val orderId = backStackEntry.arguments?.getInt("orderId") ?: -1
+            OrderDetailScreen(orderId, navController)
+        }
+        composable(
+            route = "mesero_order_detail/{orderId}",
+            arguments = listOf(navArgument("orderId") { type = NavType.IntType })
+        ) { backStackEntry ->
+            val orderId = backStackEntry.arguments?.getInt("orderId") ?: -1
+            MeseroOrderDetailScreen(orderId, navController)
+        }
         composable(
             route = "AddProductScreen?productId={productId}",
             arguments = listOf(

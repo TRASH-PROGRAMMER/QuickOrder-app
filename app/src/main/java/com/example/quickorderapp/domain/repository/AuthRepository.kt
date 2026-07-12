@@ -13,4 +13,5 @@ interface AuthRepository {
     fun getUserEmail(): Flow<String>
     suspend fun logout()
     suspend fun changePassword(newPassword: String): Boolean
+    suspend fun updateProfile(nombre: String, correo: String): Boolean
 }

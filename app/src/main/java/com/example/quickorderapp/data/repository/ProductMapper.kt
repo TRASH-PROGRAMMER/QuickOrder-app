@@ -33,4 +33,4 @@ fun Product.toEntity(): ProductEntity {
     )
 }
 
-fun List<ProductEntity>.toDomainList(): List<Product> = map { it.toDomain() }
+fun List<ProductEntity>.toProductDomainList(): List<Product> = map { it.toDomain() }

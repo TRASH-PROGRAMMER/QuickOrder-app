@@ -1,10 +1,14 @@
+@file:OptIn(ExperimentalMaterial3Api::class)
 package com.example.quickorderapp.ui.screens.mesas
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -31,6 +35,7 @@ fun MesaScreen(
     
     var showAddDialog by remember { mutableStateOf(false) }
     var mesaToEdit by remember { mutableStateOf<Mesa?>(null) }
+    val snackbarHostState = remember { SnackbarHostState() }
 
     if (showAddDialog) {
         MesaDialog(
@@ -51,6 +56,7 @@ fun MesaScreen(
     MesaScreenContent(
         uiState = uiState,
         isAdmin = userRole == "ADMIN",
+        snackbarHostState = snackbarHostState,
         onAddClick = { showAddDialog = true },
         onEditClick = { 
             mesaToEdit = it
@@ -60,18 +66,19 @@ fun MesaScreen(
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MesaScreenContent(
     uiState: MesaUiState,
     isAdmin: Boolean,
+    snackbarHostState: SnackbarHostState,
     onAddClick: () -> Unit,
     onEditClick: (Mesa) -> Unit,
     onDeleteClick: (Mesa) -> Unit
 ) {
     Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
-            TopAppBar(
+            CenterAlignedTopAppBar(
                 title = { Text("Gestión de Mesas", fontWeight = FontWeight.Bold) }
             )
         },
@@ -79,7 +86,8 @@ fun MesaScreenContent(
             if (isAdmin) {
                 FloatingActionButton(
                     onClick = onAddClick,
-                    containerColor = colorResource(R.color.esmeralda)
+                    containerColor = colorResource(R.color.esmeralda),
+                    shape = RoundedCornerShape(16.dp)
                 ) {
                     Icon(Icons.Default.Add, contentDescription = "Añadir Mesa", tint = MaterialTheme.colorScheme.onPrimary)
                 }
@@ -90,22 +98,26 @@ fun MesaScreenContent(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .padding(horizontal = 16.dp)
         ) {
             when (uiState) {
                 is MesaUiState.Loading -> {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        CircularProgressIndicator()
+                        CircularProgressIndicator(color = colorResource(R.color.esmeralda))
                     }
                 }
                 is MesaUiState.Success -> {
                     if (uiState.mesas.isEmpty()) {
                         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                            Text("No hay mesas registradas")
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                Icon(Icons.Default.TableBar, null, modifier = Modifier.size(64.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f))
+                                Spacer(Modifier.height(16.dp))
+                                Text("No hay mesas registradas", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            }
                         }
                     } else {
                         LazyColumn(
-                            contentPadding = PaddingValues(vertical = 8.dp)
+                            contentPadding = PaddingValues(16.dp),
+                            verticalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
                             items(uiState.mesas) { mesa ->
                                 MesaCard(
@@ -137,35 +149,52 @@ fun MesaDialog(
     var numero by remember { mutableStateOf(mesa?.numero?.toString() ?: "") }
     var capacidad by remember { mutableStateOf(mesa?.capacidad?.toString() ?: "") }
     var estado by remember { mutableStateOf(mesa?.estado ?: "Libre") }
+    var observaciones by remember { mutableStateOf(mesa?.observaciones ?: "") }
 
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(if (mesa == null) "Nueva Mesa" else "Editar Mesa") },
         text = {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Column(
+                modifier = Modifier.verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
                 OutlinedTextField(
                     value = numero,
                     onValueChange = { if (it.all { c -> c.isDigit() }) numero = it },
                     label = { Text("Número de Mesa") },
-                    enabled = mesa == null, // El número de mesa es el ID
-                    modifier = Modifier.fillMaxWidth()
+                    enabled = mesa == null,
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp),
+                    leadingIcon = { Icon(Icons.Default.Pin, null) }
                 )
                 OutlinedTextField(
                     value = capacidad,
                     onValueChange = { if (it.all { c -> c.isDigit() }) capacidad = it },
-                    label = { Text("Capacidad (personas)") },
-                    modifier = Modifier.fillMaxWidth()
+                    label = { Text("Capacidad") },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp),
+                    leadingIcon = { Icon(Icons.Default.Groups, null) }
                 )
-                if (mesa != null) {
-                    Text("Estado", style = MaterialTheme.typography.labelLarge)
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        listOf("Libre", "Ocupada", "Reservada").forEach { est ->
-                            FilterChip(
-                                selected = estado == est,
-                                onClick = { estado = est },
-                                label = { Text(est) }
-                            )
-                        }
+                OutlinedTextField(
+                    value = observaciones,
+                    onValueChange = { observaciones = it },
+                    label = { Text("Observaciones") },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp)
+                )
+                
+                Text("Estado", style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold)
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    listOf("Libre", "Inactiva").forEach { est ->
+                        FilterChip(
+                            selected = estado == est,
+                            onClick = { estado = est },
+                            label = { Text(est) }
+                        )
                     }
                 }
             }
@@ -177,14 +206,16 @@ fun MesaDialog(
                         Mesa(
                             numero = numero.toIntOrNull() ?: 0,
                             capacidad = capacidad.toIntOrNull() ?: 0,
-                            estado = estado
+                            estado = estado,
+                            observaciones = observaciones
                         )
                     )
                 },
                 enabled = numero.isNotBlank() && capacidad.isNotBlank(),
-                colors = ButtonDefaults.buttonColors(containerColor = colorResource(R.color.esmeralda))
+                colors = ButtonDefaults.buttonColors(containerColor = colorResource(R.color.esmeralda)),
+                shape = RoundedCornerShape(12.dp)
             ) {
-                Text("Confirmar")
+                Text("Guardar")
             }
         },
         dismissButton = {

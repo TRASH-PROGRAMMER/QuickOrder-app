@@ -26,7 +26,8 @@ class FirebaseMesaDataSource @Inject constructor(
                 "numero" to mesa.numero,
                 "capacidad" to mesa.capacidad,
                 "estado" to mesa.estado,
-                "qrCode" to mesa.qrCode
+                "qrCode" to mesa.qrCode,
+                "observaciones" to mesa.observaciones
             )
             firestore.collection(COLLECTION_MESAS)
                 .document(mesa.numero.toString())
@@ -56,7 +57,8 @@ class FirebaseMesaDataSource @Inject constructor(
                     numero = doc.getLong("numero")?.toInt() ?: 0,
                     capacidad = doc.getLong("capacidad")?.toInt() ?: 0,
                     estado = doc.getString("estado") ?: "Libre",
-                    qrCode = doc.getString("qrCode")
+                    qrCode = doc.getString("qrCode"),
+                    observaciones = doc.getString("observaciones") ?: ""
                 )
             }
             if (mesasFromCloud.isNotEmpty()) {

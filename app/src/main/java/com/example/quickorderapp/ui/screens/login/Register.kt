@@ -28,12 +28,17 @@ import com.example.quickorderapp.R
 import com.example.quickorderapp.domain.model.User
 import com.example.quickorderapp.viewmodel.RegisterViewModel
 
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.quickorderapp.viewmodel.RegisterUiState
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RegisterScreen(
     navController: NavController,
     viewModel: RegisterViewModel = hiltViewModel()
 ) {
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -48,6 +53,7 @@ fun RegisterScreen(
     ) { padding ->
         RegisterScreenContent(
             modifier = Modifier.padding(padding),
+            uiState = uiState,
             onRegister = { newUser ->
                 viewModel.register(newUser) {
                     navController.popBackStack()
@@ -61,6 +67,7 @@ fun RegisterScreen(
 @Composable
 fun RegisterScreenContent(
     modifier: Modifier = Modifier,
+    uiState: RegisterUiState,
     onRegister: (User) -> Unit,
     onLoginClick: () -> Unit
 ) {
@@ -88,7 +95,8 @@ fun RegisterScreenContent(
 
     // Heurística 5: Prevención (Formulario válido)
     val isFormValid = name.length >= 3 && emailError == null && passwordError == null && confirmError == null && 
-                     emailInput.isNotBlank() && password.isNotBlank() && confirmPassword.isNotBlank()
+                     emailInput.isNotBlank() && password.isNotBlank() && confirmPassword.isNotBlank() &&
+                     uiState !is RegisterUiState.Loading
 
     Column(
         modifier = modifier
@@ -101,6 +109,10 @@ fun RegisterScreenContent(
         Text("Regístrate como comensal para empezar", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
 
         Spacer(Modifier.height(32.dp))
+
+        if (uiState is RegisterUiState.Error) {
+            Text(uiState.message, color = MaterialTheme.colorScheme.error, modifier = Modifier.padding(bottom = 16.dp))
+        }
 
         ElevatedCard(
             modifier = Modifier.fillMaxWidth(),
@@ -181,7 +193,11 @@ fun RegisterScreenContent(
                     colors = ButtonDefaults.buttonColors(containerColor = colorResource(R.color.esmeralda)),
                     shape = RoundedCornerShape(12.dp)
                 ) {
-                    Text("¡Listo, registrarme!", style = MaterialTheme.typography.titleMedium)
+                    if (uiState is RegisterUiState.Loading) {
+                        CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp))
+                    } else {
+                        Text("¡Listo, registrarme!", style = MaterialTheme.typography.titleMedium)
+                    }
                 }
             }
         }

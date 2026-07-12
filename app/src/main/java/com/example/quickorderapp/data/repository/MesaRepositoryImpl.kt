@@ -23,7 +23,7 @@ class MesaRepositoryImpl @Inject constructor(
         if (syncManager.hasInternetConnection()) {
             syncManager.syncAll()
         }
-        return mesaDao.getAll().map { it.toDomainList() }
+        return mesaDao.getAll().map { it.toMesaDomainList() }
     }
 
     override suspend fun addMesa(mesa: Mesa) = withContext(Dispatchers.IO) {

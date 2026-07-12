@@ -8,7 +8,8 @@ fun MesaEntity.toDomain(): Mesa {
         numero = numero,
         capacidad = capacidad,
         estado = estado,
-        qrCode = qrCode
+        qrCode = qrCode,
+        observaciones = observaciones
     )
 }
 
@@ -17,8 +18,9 @@ fun Mesa.toEntity(): MesaEntity {
         numero = numero,
         capacidad = capacidad,
         estado = estado,
-        qrCode = qrCode
+        qrCode = qrCode,
+        observaciones = observaciones
     )
 }
 
-fun List<MesaEntity>.toDomainList(): List<Mesa> = map { it.toDomain() }
+fun List<MesaEntity>.toMesaDomainList(): List<Mesa> = map { it.toDomain() }

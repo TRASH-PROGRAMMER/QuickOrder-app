@@ -12,8 +12,14 @@ interface OrderDao {
     @Query("SELECT * FROM pedidos ORDER BY fecha DESC")
     fun getAll(): Flow<List<OrderEntity>>
 
+    @Query("SELECT * FROM pedidos WHERE userEmail = :email ORDER BY fecha DESC")
+    fun getByUserEmail(email: String): Flow<List<OrderEntity>>
+
     @Query("SELECT * FROM pedidos WHERE id = :id")
     suspend fun getById(id: Int): OrderEntity?
+
+    @Query("SELECT MAX(orderNumber) FROM pedidos")
+    suspend fun getMaxOrderNumber(): Int?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(order: OrderEntity): Long

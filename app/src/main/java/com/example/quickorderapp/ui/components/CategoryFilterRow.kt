@@ -16,6 +16,9 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.unit.dp
 import com.example.quickorderapp.R
 
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+
 /**
  * Componente reutilizable para mostrar una fila de filtros de categorías.
  */
@@ -37,15 +40,26 @@ fun CategoryFilterRow(
             FilterChip(
                 selected = isSelected,
                 onClick = { onCategorySelected(category) },
-                label = { Text(category) },
-                shape = RoundedCornerShape(12.dp),
+                label = { 
+                    Text(
+                        text = category,
+                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
+                    ) 
+                },
+                shape = RoundedCornerShape(24.dp),
                 colors = FilterChipDefaults.filterChipColors(
                     selectedContainerColor = colorResource(id = R.color.esmeralda),
-                    containerColor = when (index % 3) {
-                        0 -> colorResource(id = R.color.chip_promotion)
-                        1 -> colorResource(id = R.color.azul_pastel)
-                        else -> colorResource(id = R.color.chip_promotion_text)
-                    }
+                    containerColor = Color.White,
+                    labelColor = colorResource(id = R.color.esmeralda),
+                    selectedLabelColor = Color.White
+                ),
+                border = FilterChipDefaults.filterChipBorder(
+                    enabled = true,
+                    selected = isSelected,
+                    borderColor = colorResource(id = R.color.esmeralda).copy(alpha = 0.3f),
+                    selectedBorderColor = colorResource(id = R.color.esmeralda),
+                    borderWidth = 1.dp,
+                    selectedBorderWidth = 2.dp
                 )
             )
             if (index < categories.size - 1) {

@@ -85,4 +85,19 @@ class FirebaseAuthDataSource @Inject constructor(
     }
 
     fun getCurrentUserId(): String? = firebaseAuth.currentUser?.uid
+
+    suspend fun updateUserProfile(uid: String, nombre: String, correo: String) {
+        try {
+            val updates = hashMapOf(
+                "nombre" to nombre,
+                "correo" to correo
+            )
+            firestore.collection(COLLECTION_USERS)
+                .document(uid)
+                .update(updates as Map<String, Any>)
+                .await()
+        } catch (e: Exception) {
+            Log.e(TAG, "Error updating user profile in Firestore: ${e.message}", e)
+        }
+    }
 }

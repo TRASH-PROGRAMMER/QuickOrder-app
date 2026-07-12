@@ -7,5 +7,6 @@ data class Mesa(
     val numero: Int,
     val capacidad: Int,
     val estado: String = "Libre", // "Libre", "Ocupada", "Reservada"
-    val qrCode: String? = null
+    val qrCode: String? = null,
+    val observaciones: String = ""
 )

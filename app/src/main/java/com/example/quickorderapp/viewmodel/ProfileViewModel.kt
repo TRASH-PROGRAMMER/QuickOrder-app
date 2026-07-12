@@ -14,7 +14,8 @@ data class ProfileUiState(
     val role: String = "",
     val isLoading: Boolean = false,
     val passwordChanged: Boolean = false,
-    val error: String? = null
+    val error: String? = null,
+    val successMessage: String? = null
 )
 
 @HiltViewModel
@@ -64,6 +65,23 @@ class ProfileViewModel @Inject constructor(
     }
 
     fun clearMessages() {
-        _uiState.update { it.copy(passwordChanged = false, error = null) }
+        _uiState.update { it.copy(passwordChanged = false, error = null, successMessage = null) }
+    }
+
+    fun updateProfile(nombre: String, correo: String) {
+        if (nombre.isBlank() || correo.isBlank()) {
+            _uiState.update { it.copy(error = "Nombre y correo son obligatorios") }
+            return
+        }
+
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true, error = null) }
+            val success = authRepository.updateProfile(nombre, correo)
+            if (success) {
+                _uiState.update { it.copy(isLoading = false, successMessage = "Perfil actualizado") }
+            } else {
+                _uiState.update { it.copy(isLoading = false, error = "No se pudo actualizar el perfil") }
+            }
+        }
     }
 }

@@ -2,9 +2,11 @@ package com.example.quickorderapp.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.quickorderapp.domain.model.Category
 import com.example.quickorderapp.domain.model.Product
 import com.example.quickorderapp.domain.usecase.AddProductUseCase
 import com.example.quickorderapp.domain.usecase.DeleteProductUseCase
+import com.example.quickorderapp.domain.usecase.GetCategoriesUseCase
 import com.example.quickorderapp.domain.usecase.GetProductsUseCase
 import com.example.quickorderapp.domain.usecase.UpdateProductUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -28,10 +30,18 @@ sealed interface SaveStatus {
 @HiltViewModel
 class ProductViewModel @Inject constructor(
     private val getProductsUseCase: GetProductsUseCase,
+    private val getCategoriesUseCase: GetCategoriesUseCase,
     private val addProductUseCase: AddProductUseCase,
     private val updateProductUseCase: UpdateProductUseCase,
     private val deleteProductUseCase: DeleteProductUseCase
 ) : ViewModel() {
+
+    val categories: StateFlow<List<Category>> = getCategoriesUseCase()
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList()
+        )
 
     val uiState: StateFlow<ProductUiState> = getProductsUseCase()
         .map<List<Product>, ProductUiState> { products -> 

@@ -2,10 +2,12 @@ package com.example.quickorderapp.data.repository
 
 import android.net.Uri
 import com.example.quickorderapp.data.local.LocalImageDataSource
+import com.example.quickorderapp.data.local.dao.CategoryDao
 import com.example.quickorderapp.data.local.dao.ProductDao
 import com.example.quickorderapp.data.remote.firebase.FirebaseProductDataSource
 import com.example.quickorderapp.data.remote.firebase.FirebaseStorageDataSource
 import com.example.quickorderapp.data.remote.firebase.FirebaseSyncManager
+import com.example.quickorderapp.domain.model.Category
 import com.example.quickorderapp.domain.model.Product
 import com.example.quickorderapp.domain.repository.ProductRepository
 import kotlinx.coroutines.Dispatchers
@@ -18,6 +20,7 @@ import javax.inject.Singleton
 @Singleton
 class ProductRepositoryImpl @Inject constructor(
     private val productDao: ProductDao,
+    private val categoryDao: CategoryDao,
     private val firebaseProductDataSource: FirebaseProductDataSource,
     private val storageDataSource: FirebaseStorageDataSource,
     private val localImageDataSource: LocalImageDataSource,
@@ -28,7 +31,11 @@ class ProductRepositoryImpl @Inject constructor(
         if (syncManager.hasInternetConnection()) {
             syncManager.syncAll()
         }
-        return productDao.getAll().map { it.toDomainList() }
+        return productDao.getAll().map { it.toProductDomainList() }
+    }
+
+    override fun getCategories(): Flow<List<Category>> {
+        return categoryDao.getAll().map { it.toCategoryDomainList() }
     }
 
     override suspend fun addProduct(product: Product) = withContext(Dispatchers.IO) {

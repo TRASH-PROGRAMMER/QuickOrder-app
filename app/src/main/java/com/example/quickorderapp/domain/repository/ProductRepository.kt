@@ -1,5 +1,6 @@
 package com.example.quickorderapp.domain.repository
 
+import com.example.quickorderapp.domain.model.Category
 import com.example.quickorderapp.domain.model.Product
 import kotlinx.coroutines.flow.Flow
 
@@ -8,6 +9,7 @@ import kotlinx.coroutines.flow.Flow
  */
 interface ProductRepository {
     fun getProducts(): Flow<List<Product>>
+    fun getCategories(): Flow<List<Category>>
     suspend fun addProduct(product: Product)
     suspend fun updateProduct(product: Product)
     suspend fun deleteProduct(product: Product)

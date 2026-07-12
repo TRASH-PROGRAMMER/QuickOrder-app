@@ -8,8 +8,14 @@ import androidx.room.PrimaryKey
 data class OrderEntity(
     @PrimaryKey(autoGenerate = true)
     val id: Int = 0,
+    val orderNumber: Int = 0,
+    val remoteId: String = "",
+    val userEmail: String = "",
+    val clienteNombre: String = "",
+    val clienteId: String = "",
     val numeroMesa: Int,
     val total: Double,
-    val estado: String, // "Pendiente", "Preparando", "Servido", "Pagado"
-    val fecha: Long = System.currentTimeMillis()
- )
+    val estado: String, // "PENDIENTE", "EN PREPARACIÓN", "COMPLETADO", "CANCELADO"
+    val fecha: Long = System.currentTimeMillis(),
+    val notas: String = ""
+)

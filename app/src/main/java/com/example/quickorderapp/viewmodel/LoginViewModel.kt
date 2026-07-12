@@ -26,12 +26,16 @@ class LoginViewModel @Inject constructor(
 
     fun login(email: String, password: String) {
         viewModelScope.launch {
-            _uiState.value = LoginUiState.Loading
-            val user = loginUseCase(email, password)
-            if (user != null) {
-                _uiState.value = LoginUiState.Success
-            } else {
-                _uiState.value = LoginUiState.Error("Correo o contraseña incorrectos")
+            try {
+                _uiState.value = LoginUiState.Loading
+                val user = loginUseCase(email, password)
+                if (user != null) {
+                    _uiState.value = LoginUiState.Success
+                } else {
+                    _uiState.value = LoginUiState.Error("Correo o contraseña incorrectos")
+                }
+            } catch (e: Exception) {
+                _uiState.value = LoginUiState.Error("Error de conexión: ${e.localizedMessage}")
             }
         }
     }
